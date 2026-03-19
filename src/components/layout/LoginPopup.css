@@ -1,0 +1,165 @@
+@keyframes popupOverlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popupCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes popupLogoSpinIn {
+  from {
+    opacity: 0;
+    transform: scale(0.7) rotate(-10deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes popupActionIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  animation: popupOverlayIn 0.22s ease-out;
+}
+
+.login-popup-card {
+  width: min(360px, 100%);
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.22);
+  padding: 18px 14px 12px;
+  position: relative;
+  text-align: center;
+  animation: popupCardIn 0.26s ease-out;
+}
+
+.login-popup-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: 0;
+  background: transparent;
+  color: #374151;
+  font-size: 16px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.login-popup-close:hover {
+  background: #f3f4f6;
+}
+
+.login-popup-card h3 {
+  margin: 2px 0 8px;
+  font-size: 32px;
+  color: #d70018;
+  line-height: 1;
+}
+
+.login-popup-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  border: 1px solid #fecdd3;
+  background: #fff1f2;
+  color: #d70018;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  animation: popupLogoSpinIn 0.42s ease-out 0.08s both;
+}
+
+.login-popup-card p {
+  margin: 0 auto 14px;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.45;
+  max-width: 290px;
+}
+
+.login-popup-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.login-popup-register,
+.login-popup-login {
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  opacity: 0;
+  animation: popupActionIn 0.3s ease-out both;
+}
+
+.login-popup-actions a:nth-child(1) {
+  animation-delay: 0.16s;
+}
+
+.login-popup-actions a:nth-child(2) {
+  animation-delay: 0.22s;
+}
+
+.login-popup-register {
+  color: #d70018;
+  border: 1px solid #fca5a5;
+  background: #ffffff;
+}
+
+.login-popup-login {
+  color: #ffffff;
+  border: 1px solid #d70018;
+  background: #d70018;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-popup-overlay,
+  .login-popup-card,
+  .login-popup-logo,
+  .login-popup-register,
+  .login-popup-login {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

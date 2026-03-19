@@ -1,4 +1,6 @@
 ﻿import { Link } from 'react-router-dom';
+import '../AuthBase.css';
+import './LogInPage.css';
 
 function Input({ label, ...props }) {
   return (

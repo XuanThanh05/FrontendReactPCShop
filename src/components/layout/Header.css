@@ -1,0 +1,118 @@
+@keyframes mainDropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pc-header {
+  position: sticky;
+  top: 0;
+  z-index: 120;
+  background: linear-gradient(180deg, #ef233c 0%, #d70018 100%);
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  animation: mainDropIn 0.4s ease-out;
+}
+
+.pc-header-inner {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: auto minmax(220px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.pc-header-brand-wrap {
+  min-width: max-content;
+}
+
+.pc-header-brand {
+  text-decoration: none;
+  color: #ffffff;
+  font-weight: 800;
+  letter-spacing: 1px;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+}
+
+.pc-header-search-wrap {
+  width: 100%;
+}
+
+.pc-header-search {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 10px 12px;
+  font-weight: 600;
+  background: #ffffff;
+}
+
+.pc-header-search:focus-visible {
+  outline: none;
+  border-color: #fecaca;
+  box-shadow: 0 0 0 3px rgba(254, 202, 202, 0.4);
+}
+
+.pc-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-link {
+  text-decoration: none;
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 6px 10px;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.header-link-button {
+  border: 0;
+  cursor: pointer;
+  background: transparent;
+  font: inherit;
+}
+
+.header-link:hover,
+.header-link:focus-visible {
+  background: rgba(255, 255, 255, 0.18);
+  outline: none;
+}
+
+@media (max-width: 980px) {
+  .pc-header-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .pc-header-brand-wrap {
+    display: flex;
+    justify-content: center;
+  }
+
+  .pc-header-actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .pc-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .header-link {
+    padding: 6px 8px;
+    font-size: 0.88rem;
+  }
+}

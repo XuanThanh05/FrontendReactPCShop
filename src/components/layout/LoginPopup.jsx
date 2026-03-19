@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import './LoginPopup.css';
 
 export default function LoginPopup({ open, onClose }) {
   if (!open) return null;
