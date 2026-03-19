@@ -587,6 +587,21 @@ img {
   animation: floatPulse 2.5s ease-in-out infinite;
 }
 
+.back-to-top-btn {
+  background: #0b0b0f !important;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.24s ease, transform 0.24s ease;
+  animation: none !important;
+}
+
+.back-to-top-btn.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 .site-footer {
   background: #f8fafc;
   color: #111827;
