@@ -1,4 +1,3 @@
-import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "../features/homepage/Home";
 import ProductDetailPage from "../features/productdetail/ProductDetailPage";

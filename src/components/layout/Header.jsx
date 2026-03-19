@@ -1,25 +1,36 @@
 ﻿import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { productCatalog } from '../../data/productCatalog';
 import './Header.css';
 
 export default function Header({ onLoginClick }) {
   const [keyword, setKeyword] = useState('');
   const [showSuggest, setShowSuggest] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
+  useEffect(() => {
+    const searchText = new URLSearchParams(location.search).get('q') || '';
+    setKeyword(searchText);
+  }, [location.pathname, location.search]);
 
-  const suggestions = [
-    'iPhone',
-    'iPhone 17 Series',
-    'iPhone 16',
-    'Dán màn hình điện thoại',
-    'Cáp sạc iPhone, Android'
-  ];
+  const suggestions = useMemo(() => {
+    const top = productCatalog.map((item) => item.name);
+    return [...new Set(top)].slice(0, 8);
+  }, []);
 
   const filtered = suggestions.filter(item =>
     item.toLowerCase().includes(keyword.toLowerCase())
   );
+
+  const submitSearch = (value) => {
+    const normalized = value.trim();
+    navigate(normalized ? `/search?q=${encodeURIComponent(normalized)}` : '/search');
+    setShowSuggest(false);
+  };
+
   return (
     <header className="pc-header">
       <div className="pc-header-inner">
@@ -35,8 +46,8 @@ export default function Header({ onLoginClick }) {
             onFocus={() => setShowSuggest(true)}
             onBlur={() => setTimeout(() => setShowSuggest(false), 200)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && keyword.trim() !== '') {
-                navigate(`/search?q=${keyword}`);
+              if (e.key === 'Enter') {
+                submitSearch(keyword);
               }
             }}
             style={{
@@ -81,7 +92,10 @@ export default function Header({ onLoginClick }) {
                 {filtered.map((item, index) => (
                   <div
                     key={index}
-                    onMouseDown={() => setKeyword(item)}
+                    onMouseDown={() => {
+                      setKeyword(item);
+                      submitSearch(item);
+                    }}
                     style={{
                       padding: '10px 12px',
                       fontSize: 14,

@@ -1,22 +1,11 @@
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
-
-const productData = [
-  { id: '0', name: 'Galaxy Tab A8', price: '6.890.000', discount: 4, tag: 'Trả góp 0%', image: 'https://cdn2.cellphones.com.vn/insecure/rs:fill:0:300/q:100/plain/https://cellphones.com.vn/media/catalog/product/s/a/samsung-galaxy-s26-ultra-1.jpg', description: 'Tablet siêu bền, phù hợp học tập và giải trí.' },
-  { id: '1', name: 'MacBook Air M2', price: '29.990.000', discount: 5, tag: 'Hot', image: 'https://cdn2.cellphones.com.vn/insecure/rs:fill:0:300/q:100/plain/https://cellphones.com.vn/media/catalog/product/s/a/samsung-galaxy-s26-ultra-1.jpg', description: 'MacBook nhẹ, mỏng, hiệu năng cao cho công việc và thiết kế.' },
-  { id: '2', name: 'iPhone 15', price: '24.990.000', discount: 9, tag: 'New', image: 'https://cdn2.cellphones.com.vn/insecure/rs:fill:0:300/q:100/plain/https://cellphones.com.vn/media/catalog/product/s/a/samsung-galaxy-s26-ultra-1.jpg', description: 'Điện thoại mới nhất với camera xịn và pin lâu.' },
-  { id: '3', name: 'Laptop Dell XPS 13', price: '31.990.000', discount: 11, tag: 'Best seller', image: 'https://cdn2.cellphones.com.vn/insecure/rs:fill:0:300/q:100/plain/https://cellphones.com.vn/media/catalog/product/s/a/samsung-galaxy-s26-ultra-1.jpg', description: 'Laptop mỏng nhẹ, phù hợp dân văn phòng và lập trình.' },
-  { id: '4', name: 'Sony WH-1000XM5', price: '7.990.000', discount: 40, tag: 'Deal', image: 'https://cdn2.cellphones.com.vn/insecure/rs:fill:0:300/q:100/plain/https://cellphones.com.vn/media/catalog/product/s/a/samsung-galaxy-s26-ultra-1.jpg', description: 'Tai nghe chống ồn đỉnh, âm thanh trong trẻo.' },
-  { id: '5', name: 'Samsung S25', price: '22.990.000', discount: 20, tag: 'Hot', image: 'https://cdn2.cellphones.com.vn/insecure/rs:fill:0:300/q:100/plain/https://cellphones.com.vn/media/catalog/product/s/a/samsung-galaxy-s26-ultra-1.jpg', description: 'Điện thoại flagship, hiệu năng mượt và camera pro.' },
-  { id: '6', name: 'LG OLED 55"', price: '27.900.000', discount: 7, tag: 'Sale', image: 'https://cdn2.cellphones.com.vn/insecure/rs:fill:0:300/q:100/plain/https://cellphones.com.vn/media/catalog/product/s/a/samsung-galaxy-s26-ultra-1.jpg', description: 'TV OLED 55 inch, màu sắc sắc nét, độ tương phản tuyệt vời.' },
-  { id: '7', name: 'Máy in HP', price: '2.190.000', discount: 3, tag: 'Office', image: 'https://cdn2.cellphones.com.vn/insecure/rs:fill:0:300/q:100/plain/https://cellphones.com.vn/media/catalog/product/s/a/samsung-galaxy-s26-ultra-1.jpg', description: 'Máy in nhỏ gọn, thích hợp văn phòng gia đình.' },
-];
+import { productCatalog } from '../../data/productCatalog';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const product = productData.find((item) => item.id === id);
+  const product = productCatalog.find((item) => item.id === id);
 
   if (!product) {
     return (
