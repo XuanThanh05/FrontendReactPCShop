@@ -21,3 +21,22 @@ npm install recharts
 
 #### 2. Cài routing
 npm install react-router-dom
+
+
+# Mock data:
+
+> [!NOTE] 
+
+> Dữ liệu mock để test trước khi có backend
+
+- Tài khoản admin:
+```js
+0909000000 
+admin123
+```
+
+- Tài khoản user
+```js
+0909000001
+user123
+```
