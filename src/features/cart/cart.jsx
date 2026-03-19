@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/useAuth";
 import "./Cart.css";
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -180,6 +181,7 @@ function CartItem({ item, onSelect, onQtyChange, onRemove }) {
 // ── Main Cart Component ───────────────────────────────────────────────────────
 export default function Cart() {
   const navigate = useNavigate();
+  const { currentUser, isAdmin, logout } = useAuth();
   const [items, setItems] = useState(INITIAL_ITEMS);
   const [selectAll, setSelectAll] = useState(false);
 
@@ -204,6 +206,19 @@ export default function Cart() {
   const saved = selectedItems.reduce((s, i) => s + discount(i) * i.qty, 0);
   const selectedCount = selectedItems.reduce((s, i) => s + i.qty, 0);
 
+  const goToCheckout = () => {
+    if (selectedItems.length === 0) return;
+
+    navigate("/checkout", {
+      state: {
+        items: selectedItems,
+        total,
+        saved,
+        selectedCount,
+      },
+    });
+  };
+
   return (
     <div className="cart-page">
       <header className="cart-header">
@@ -215,7 +230,19 @@ export default function Cart() {
           </div>
           <div className="cart-header__actions">
             <button className="cart-header__btn">🛒 Giỏ hàng</button>
-            <button className="cart-header__btn">👤 Đăng nhập</button>
+            {isAdmin ? (
+              <button className="cart-header__btn" onClick={() => navigate("/admin/users")}>
+                🛠 Quản lý user
+              </button>
+            ) : null}
+            {currentUser ? (
+              <>
+                <span className="cart-header__user">👋 {currentUser.fullName}</span>
+                <button className="cart-header__btn" onClick={logout}>Đăng xuất</button>
+              </>
+            ) : (
+              <button className="cart-header__btn" onClick={() => navigate("/login")}>👤 Đăng nhập</button>
+            )}
           </div>
         </div>
       </header>
@@ -295,7 +322,7 @@ export default function Cart() {
                 </div>
               )}
 
-              <button className="cart-buy-btn" disabled={selectedCount === 0}>
+              <button className="cart-buy-btn" disabled={selectedCount === 0} onClick={goToCheckout}>
                 Mua ngay{selectedCount > 0 ? ` (${selectedCount})` : ""}
               </button>
 
@@ -321,7 +348,7 @@ export default function Cart() {
               </div>
             )}
           </div>
-          <button className="cart-sticky-btn">Mua ngay ({selectedCount})</button>
+          <button className="cart-sticky-btn" onClick={goToCheckout}>Mua ngay ({selectedCount})</button>
         </div>
       )}
     </div>

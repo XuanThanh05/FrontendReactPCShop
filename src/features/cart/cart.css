@@ -74,6 +74,14 @@
   padding: 4px 8px;
 }
 
+.cart-header__user {
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 4px 2px;
+}
+
 /* ── Body ──────────────────────────────────────────────────────────────────── */
 .cart-body {
   max-width: 1200px;

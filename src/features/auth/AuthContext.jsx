@@ -5,6 +5,7 @@ import {
   loginWithMock,
   logoutMock,
   getCurrentUser,
+  subscribeAuthChanges,
 } from "../../services/mockAuthService";
 import AuthContext from "./authContextInstance";
 
@@ -13,6 +14,31 @@ export default function AuthProvider({ children }) {
 
   useEffect(() => {
     initializeMockUsers();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeAuthChanges((nextUser) => {
+      setCurrentUser(nextUser);
+    });
+
+    const syncSession = () => {
+      setCurrentUser(getCurrentUser());
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        syncSession();
+      }
+    };
+
+    window.addEventListener("focus", syncSession);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener("focus", syncSession);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, []);
 
   const login = async (credentials) => {

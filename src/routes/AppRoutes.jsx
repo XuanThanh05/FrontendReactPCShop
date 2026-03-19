@@ -8,6 +8,7 @@ import SearchPage from "../features/searchpage/SearchPage";
 import UserManagementPage from "../features/admin/usermanagement/UserManagementPage";
 import AdminRoute from "./AdminRoute";
 import Cart from "../features/cart/cart"
+import CheckoutPage from "../features/checkout/CheckoutPage";
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -18,6 +19,7 @@ export default function AppRoutes() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/search" element={<SearchPage />} />
          <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
         <Route element={<AdminRoute />}>
           <Route path="/admin/statistics" element={<StatisticsPage />} />
           <Route path="/admin/users" element={<UserManagementPage />} />

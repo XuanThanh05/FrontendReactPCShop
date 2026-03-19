@@ -2,6 +2,7 @@ import { MOCK_USERS } from "../data/mockUsers";
 
 const USERS_STORAGE_KEY = "pcshop_mock_users";
 const AUTH_STORAGE_KEY = "pcshop_current_user";
+const AUTH_CHANGED_EVENT = "pcshop_auth_changed";
 
 function stripPassword(user) {
   if (!user) return null;
@@ -23,6 +24,15 @@ function readUsersFromStorage() {
 
 function writeUsersToStorage(users) {
   localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+}
+
+function emitAuthChanged(user) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent(AUTH_CHANGED_EVENT, {
+      detail: { user: stripPassword(user) },
+    })
+  );
 }
 
 export function initializeMockUsers() {
@@ -56,6 +66,7 @@ export function loginWithMock({ phone, password }) {
 
   const safeUser = stripPassword(matchedUser);
   localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(safeUser));
+  emitAuthChanged(safeUser);
   return safeUser;
 }
 
@@ -72,6 +83,7 @@ export function getCurrentUser() {
 
 export function logoutMock() {
   localStorage.removeItem(AUTH_STORAGE_KEY);
+  emitAuthChanged(null);
 }
 
 export function isAdminUser(user) {
@@ -92,7 +104,9 @@ export function updateUserById(userId, updater) {
   const currentUser = getCurrentUser();
   if (currentUser?.id === userId) {
     const refreshedCurrent = updatedUsers.find((item) => item.id === userId);
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(stripPassword(refreshedCurrent)));
+    const safeUser = stripPassword(refreshedCurrent);
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(safeUser));
+    emitAuthChanged(safeUser);
   }
 
   return updatedUsers.map(stripPassword);
@@ -100,4 +114,28 @@ export function updateUserById(userId, updater) {
 
 export function resetMockUsers() {
   writeUsersToStorage(MOCK_USERS);
+}
+
+export function subscribeAuthChanges(listener) {
+  if (typeof window === "undefined") {
+    return () => {};
+  }
+
+  const onStorage = (event) => {
+    if (event.key === AUTH_STORAGE_KEY || event.key === null) {
+      listener(getCurrentUser());
+    }
+  };
+
+  const onCustomAuthChange = (event) => {
+    listener(event?.detail?.user ?? getCurrentUser());
+  };
+
+  window.addEventListener("storage", onStorage);
+  window.addEventListener(AUTH_CHANGED_EVENT, onCustomAuthChange);
+
+  return () => {
+    window.removeEventListener("storage", onStorage);
+    window.removeEventListener(AUTH_CHANGED_EVENT, onCustomAuthChange);
+  };
 }
