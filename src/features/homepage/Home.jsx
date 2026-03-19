@@ -61,8 +61,8 @@ export default function Home() {
               <div className="hot-sale-head"><div><h3>🔥 HOT SALE CUỐI TUẦN</h3><p>Ưu đãi sốc, săn ngay</p></div><div className="timer">01 : 02 : 22 : 17</div></div>
               <div className="hot-tabs"><button>Điện thoại, Tablet</button><button>Phụ kiện, PC</button></div>
               <div className="product-grid">
-                {products.map((p) => (
-                  <div key={p.name} className="product-card">
+                {products.map((p, i) => (
+                  <Link key={p.name} to={`/product/${i}`} className="product-card" style={{ textDecoration: 'none', color: 'inherit' }}>
                     <div className="product-img">
                       <div className="badge-wrap">
                         <span className="discount-badge">
@@ -74,7 +74,7 @@ export default function Home() {
                     </div>
                     <div className="product-name">{p.name}</div>
                     <div className="product-price">{p.price} đ</div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </section>
