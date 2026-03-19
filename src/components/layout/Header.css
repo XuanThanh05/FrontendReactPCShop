@@ -84,6 +84,12 @@
   font: inherit;
 }
 
+.header-user-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #fff5f5;
+}
+
 .header-link:hover,
 .header-link:focus-visible {
   background: rgba(255, 255, 255, 0.18);

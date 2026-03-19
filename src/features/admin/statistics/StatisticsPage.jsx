@@ -4,6 +4,8 @@
 // ============================================================
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   LineChart, Line, BarChart, Bar,
   PieChart, Pie, Cell, Tooltip,
@@ -20,6 +22,7 @@ import {
   warehouseReport,
   newCustomersByMonth,
 } from "./mockData";
+import { useAuth } from "../../auth/useAuth";
 
 import "./StatisticsPage.css";
 
@@ -60,8 +63,15 @@ const CustomerTooltip = ({ active, payload, label }) => {
 
 // ---- Component chính ----
 export default function StatisticsPage() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [selectedYear, setSelectedYear] = useState("2024");
   const maxSold = Math.max(...topProducts.map((p) => p.sold));
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const getStockStatus = (item) => {
     if (item.stock === 0)           return "danger";
@@ -77,6 +87,15 @@ export default function StatisticsPage() {
 
   return (
     <div className="stats-page">
+      <div className="stats-topbar">
+        <div className="stats-topbar-links">
+          <Link to="/" className="stats-nav-btn">← Về trang chủ</Link>
+          <Link to="/admin/users" className="stats-nav-btn">Quản lý user</Link>
+        </div>
+        <button type="button" className="stats-nav-btn danger" onClick={handleLogout}>
+          Đăng xuất
+        </button>
+      </div>
 
       {/* ---- Header ---- */}
       <div className="stats-header">

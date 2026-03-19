@@ -109,6 +109,104 @@
   align-content: start;
 }
 
+.login-account-hint {
+  margin: 0 0 12px;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.login-account-hint > span {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.login-demo-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.login-demo-btn {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  border-radius: 14px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+}
+
+.login-demo-btn:hover {
+  border-color: #f87171;
+  color: #b91c1c;
+  background: #fff1f2;
+}
+
+.login-demo-btn strong {
+  font-size: 12px;
+}
+
+.login-demo-btn small {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.login-error-toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(92vw, 420px);
+  background: #7f1d1d;
+  color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+  padding: 10px 12px;
+  animation: loginToastDrop 0.24s ease-out;
+}
+
+.login-error-toast span {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.login-error-toast-close {
+  border: 0;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+@keyframes loginToastDrop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 .login-inline-alert {
   display: grid;
   gap: 2px;
@@ -126,6 +224,13 @@
 
 .login-inline-alert span {
   font-size: 12px;
+}
+
+.auth-primary-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 @media (max-width: 980px) {

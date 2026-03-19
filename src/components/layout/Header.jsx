@@ -3,9 +3,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { productCatalog } from '../../data/productCatalog';
+import { useAuth } from '../../features/auth/useAuth';
 import './Header.css';
 
 export default function Header({ onLoginClick }) {
+  const { currentUser, isAdmin, logout } = useAuth();
   const [keyword, setKeyword] = useState('');
   const [showSuggest, setShowSuggest] = useState(false);
   const navigate = useNavigate();
@@ -117,21 +119,36 @@ export default function Header({ onLoginClick }) {
             </div>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Link to="/cart" className="header-link" style={{ color: '#fff', textDecoration: 'none', fontWeight: 400 }}>🛒 Giỏ hàng</Link>
-          <Link
-            to="/login"
-            className="header-link"
-            style={{ color: '#fff', textDecoration: 'none', fontWeight: 400 }}
-            onClick={(e) => {
-              if (onLoginClick) {
-                e.preventDefault();
-                onLoginClick();
-              }
-            }}
-          >
-            👤 Đăng nhập
-          </Link>
+        <div className="pc-header-actions">
+          <Link to="/cart" className="header-link">🛒 Giỏ hàng</Link>
+
+          {isAdmin ? <Link to="/admin/users" className="header-link">🛠 Quản lý user</Link> : null}
+
+          {currentUser ? (
+            <>
+              <span className="header-user-label">Xin chào, {currentUser.fullName}</span>
+              <button
+                type="button"
+                className="header-link header-link-button"
+                onClick={logout}
+              >
+                Đăng xuất
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/login"
+              className="header-link"
+              onClick={(e) => {
+                if (onLoginClick) {
+                  e.preventDefault();
+                  onLoginClick();
+                }
+              }}
+            >
+              👤 Đăng nhập
+            </Link>
+          )}
         </div>
       </div>
     </header>

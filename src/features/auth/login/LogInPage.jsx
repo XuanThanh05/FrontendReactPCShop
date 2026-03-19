@@ -1,6 +1,9 @@
 ﻿import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../AuthBase.css';
 import './LogInPage.css';
+import { useAuth } from '../useAuth';
 
 function Input({ label, ...props }) {
   return (
@@ -12,6 +15,13 @@ function Input({ label, ...props }) {
 }
 
 export default function LogInPage() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const benefits = [
     'Chiết khấu đến 5% khi mua sản phẩm tại CellphoneS',
     'Miễn phí giao hàng cho thành viên Smember',
@@ -21,8 +31,65 @@ export default function LogInPage() {
     'S-Business: Ưu đãi riêng cho khách hàng doanh nghiệp',
   ];
 
+  const fillDemoCredentials = (type) => {
+    if (type === 'admin') {
+      setPhone('0909000000');
+      setPassword('admin123');
+      setErrorMessage('');
+      return;
+    }
+
+    setPhone('0909000001');
+    setPassword('user123');
+    setErrorMessage('');
+  };
+
+  useEffect(() => {
+    if (!errorMessage) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setErrorMessage('');
+    }, 3200);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [errorMessage]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setErrorMessage('');
+
+    if (!phone.trim() || !password.trim()) {
+      setErrorMessage('Vui lòng nhập đầy đủ số điện thoại và mật khẩu.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const user = await login({ phone, password });
+      navigate(user.role === 'admin' ? '/admin/users' : '/');
+    } catch (error) {
+      setErrorMessage(error?.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="auth-page auth-page-login">
+      {errorMessage ? (
+        <div className="login-error-toast" role="alert" aria-live="assertive">
+          <span>{errorMessage}</span>
+          <button
+            type="button"
+            className="login-error-toast-close"
+            onClick={() => setErrorMessage('')}
+            aria-label="Đóng thông báo"
+          >
+            x
+          </button>
+        </div>
+      ) : null}
+
       <div className="auth-shell login-shell">
         <section className="login-showcase auth-enter-left">
           <div className="login-brand-row">
@@ -51,13 +118,42 @@ export default function LogInPage() {
         <section className="auth-card login-form-card auth-enter-right">
 
           <h1 className="auth-title">Đăng nhập SMEMBER</h1>
-
-          <div className="auth-form-group">
-            <Input label="Số điện thoại" placeholder="Nhập số điện thoại của bạn" type="tel" />
-            <Input label="Mật khẩu" placeholder="Nhập mật khẩu của bạn" type="password" />
+          <div className="login-account-hint">
+            <span>Chọn nhanh tài khoản demo:</span>
+            <div className="login-demo-actions">
+              <button type="button" className="login-demo-btn" onClick={() => fillDemoCredentials('user')}>
+                <strong>User demo</strong>
+                <small>0909000001 / user123</small>
+              </button>
+              <button type="button" className="login-demo-btn" onClick={() => fillDemoCredentials('admin')}>
+                <strong>Admin demo</strong>
+                <small>0909000000 / admin123</small>
+              </button>
+            </div>
           </div>
 
-          <button className="auth-primary-btn">Đăng nhập</button>
+          <form onSubmit={handleSubmit}>
+            <div className="auth-form-group">
+              <Input
+                label="Số điện thoại"
+                placeholder="Nhập số điện thoại của bạn"
+                type="tel"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+              />
+              <Input
+                label="Mật khẩu"
+                placeholder="Nhập mật khẩu của bạn"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            </div>
+
+            <button className="auth-primary-btn" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            </button>
+          </form>
           <div className="auth-text-center" style={{ marginTop: 10 }}>
             <Link to="/" className="auth-link">Quên mật khẩu?</Link>
           </div>
