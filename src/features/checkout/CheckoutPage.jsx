@@ -6,7 +6,7 @@ import "./CheckoutPage.css";
 const DEFAULT_CHECKOUT_ITEMS = [
   {
     id: "mock-1",
-    name: "Tecno Pova 7 8GB 128GB-Nau",
+    name: "Tecno Pova 7 8GB 128GB-Nâu",
     price: 4490000,
     qty: 1,
     image:
@@ -15,12 +15,12 @@ const DEFAULT_CHECKOUT_ITEMS = [
 ];
 
 const PAYMENT_METHODS = [
-  { id: "cod", label: "Thanh toan khi nhan hang (COD)" },
-  { id: "bank", label: "Chuyen khoan ngan hang" },
-  { id: "card", label: "The ATM / Visa / MasterCard" },
+  { id: "cod", label: "Thanh toán khi nhận hàng (COD)" },
+  { id: "bank", label: "Chuyển khoản ngân hàng" },
+  { id: "card", label: "Thẻ ATM / Visa / MasterCard" },
 ];
 
-const fmt = (n) => n.toLocaleString("vi-VN") + "d";
+const fmt = (n) => n.toLocaleString("vi-VN") + "đ";
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ export default function CheckoutPage() {
     event.preventDefault();
 
     if (!customer.fullName.trim() || !customer.phone.trim() || !customer.address.trim()) {
-      window.alert("Vui long nhap day du ho ten, so dien thoai va dia chi nhan hang.");
+      window.alert("Vui lòng nhập đầy đủ họ tên, số điện thoại và địa chỉ nhận hàng.");
       return;
     }
 
@@ -69,17 +69,17 @@ export default function CheckoutPage() {
       <div className="checkout-page checkout-success-page">
         <div className="checkout-success-card">
           <div className="checkout-success-icon">✓</div>
-          <h1>Thanh toan thanh cong</h1>
+          <h1>Thanh toán thành công</h1>
           <p>
-            Don hang mock da duoc ghi nhan. Nhan vien se goi xac nhan voi ban trong 5-10 phut.
+            Đơn hàng mock đã được ghi nhận. Nhân viên sẽ gọi xác nhận với bạn trong 5-10 phút.
           </p>
           <div className="checkout-success-meta">
-            <span>Tong thanh toan: {fmt(grandTotal)}</span>
-            <span>Phuong thuc: {PAYMENT_METHODS.find((m) => m.id === paymentMethod)?.label}</span>
+            <span>Tổng thanh toán: {fmt(grandTotal)}</span>
+            <span>Phương thức: {PAYMENT_METHODS.find((m) => m.id === paymentMethod)?.label}</span>
           </div>
           <div className="checkout-success-actions">
-            <button type="button" onClick={() => navigate("/")}>Ve trang chu</button>
-            <button type="button" className="outline" onClick={() => navigate("/cart")}>Mua tiep</button>
+            <button type="button" onClick={() => navigate("/")}>Về trang chủ</button>
+            <button type="button" className="outline" onClick={() => navigate("/cart")}>Mua tiếp</button>
           </div>
         </div>
       </div>
@@ -89,53 +89,53 @@ export default function CheckoutPage() {
   return (
     <div className="checkout-page">
       <div className="checkout-topbar">
-        <button type="button" onClick={() => navigate("/cart")}>← Quay lai gio hang</button>
+        <button type="button" onClick={() => navigate("/cart")}>← Quay lại giỏ hàng</button>
         <span>Checkout mock</span>
       </div>
 
       <div className="checkout-layout">
         <form className="checkout-form-card" onSubmit={handleSubmit}>
-          <h1>Thong tin giao hang</h1>
+          <h1>Thông tin giao hàng</h1>
 
           <label>
-            Ho va ten
+            Họ và tên
             <input
               value={customer.fullName}
               onChange={(event) => updateField("fullName", event.target.value)}
-              placeholder="Nhap ho va ten"
+              placeholder="Nhập họ và tên"
             />
           </label>
 
           <label>
-            So dien thoai
+            Số điện thoại
             <input
               value={customer.phone}
               onChange={(event) => updateField("phone", event.target.value)}
-              placeholder="Nhap so dien thoai"
+              placeholder="Nhập số điện thoại"
             />
           </label>
 
           <label>
-            Dia chi nhan hang
+            Địa chỉ nhận hàng
             <input
               value={customer.address}
               onChange={(event) => updateField("address", event.target.value)}
-              placeholder="So nha, duong, quan/huyen, tinh/thanh"
+              placeholder="Số nhà, đường, quận/huyện, tỉnh/thành"
             />
           </label>
 
           <label>
-            Ghi chu (tuy chon)
+            Ghi chú (tùy chọn)
             <textarea
               value={customer.note}
               onChange={(event) => updateField("note", event.target.value)}
-              placeholder="Vi du: giao gio hanh chinh"
+              placeholder="Ví dụ: giao giờ hành chính"
               rows={3}
             />
           </label>
 
           <div className="checkout-payment-methods">
-            <h2>Phuong thuc thanh toan</h2>
+            <h2>Phương thức thanh toán</h2>
             {PAYMENT_METHODS.map((method) => (
               <label key={method.id} className="checkout-radio-row">
                 <input
@@ -150,12 +150,12 @@ export default function CheckoutPage() {
           </div>
 
           <button type="submit" className="checkout-submit-btn" disabled={isSubmitting}>
-            {isSubmitting ? "Dang xu ly thanh toan..." : "Xac nhan dat hang"}
+            {isSubmitting ? "Đang xử lý thanh toán..." : "Xác nhận đặt hàng"}
           </button>
         </form>
 
         <aside className="checkout-summary-card">
-          <h2>Don hang cua ban</h2>
+          <h2>Đơn hàng của bạn</h2>
 
           <div className="checkout-item-list">
             {items.map((item) => (
@@ -163,7 +163,7 @@ export default function CheckoutPage() {
                 <img src={item.image} alt={item.name} />
                 <div>
                   <p className="checkout-item-name">{item.name}</p>
-                  <span>So luong: {item.qty}</span>
+                  <span>Số lượng: {item.qty}</span>
                 </div>
                 <strong>{fmt(item.price * item.qty)}</strong>
               </div>
@@ -171,19 +171,19 @@ export default function CheckoutPage() {
           </div>
 
           <div className="checkout-row">
-            <span>Tam tinh</span>
+            <span>Tạm tính</span>
             <span>{fmt(total)}</span>
           </div>
           <div className="checkout-row">
-            <span>Phi van chuyen</span>
-            <span>{shippingFee === 0 ? "Mien phi" : fmt(shippingFee)}</span>
+            <span>Phí vận chuyển</span>
+            <span>{shippingFee === 0 ? "Miễn phí" : fmt(shippingFee)}</span>
           </div>
           <div className="checkout-row total">
-            <span>Tong thanh toan</span>
+            <span>Tổng thanh toán</span>
             <strong>{fmt(grandTotal)}</strong>
           </div>
 
-          <p className="checkout-note">Trang thanh toan nay su dung du lieu gia lap de demo luong dat hang.</p>
+          <p className="checkout-note">Trang thanh toán này sử dụng dữ liệu giả lập để demo luồng đặt hàng.</p>
         </aside>
       </div>
     </div>

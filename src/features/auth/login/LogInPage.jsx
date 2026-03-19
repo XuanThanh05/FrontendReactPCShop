@@ -15,7 +15,7 @@ function Input({ label, ...props }) {
 }
 
 export default function LogInPage() {
-  const { login } = useAuth();
+  const { login, currentUser } = useAuth();
   const navigate = useNavigate();
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -53,6 +53,11 @@ export default function LogInPage() {
 
     return () => window.clearTimeout(timeoutId);
   }, [errorMessage]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    navigate(currentUser.role === 'admin' ? '/admin/users' : '/', { replace: true });
+  }, [currentUser, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
