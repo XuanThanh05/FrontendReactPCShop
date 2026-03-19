@@ -2,52 +2,87 @@
 
 function Input({ label, ...props }) {
   return (
-    <label style={{ display: 'grid', gap: 6, color: '#1f2937', fontSize: 13 }}>
-      <span style={{ fontWeight: 600 }}>{label}</span>
-      <input {...props} style={{ width: '100%', borderRadius: 8, border: '1px solid #e2e8f0', padding: '10px 12px', outline: 'none' }} />
+    <label className="auth-input-label">
+      <span>{label}</span>
+      <input {...props} className="auth-input" />
     </label>
   );
 }
 
 export default function RegisterPage() {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f3f4f6', display: 'grid', placeItems: 'center', padding: 16 }}>
-      <div style={{ width: '100%', maxWidth: 760, backgroundColor: '#fff', borderRadius: 14, boxShadow: '0 8px 24px rgba(0,0,0,0.08)', padding: 20 }}>
-        <h1 style={{ margin: 0, textAlign: 'center', color: '#d70016', fontSize: '1.9rem' }}>Đăng ký trở thành SMEMBER</h1>
-        <div style={{ textAlign: 'center', marginTop: 10 }}>
-          <div style={{ width: 80, height: 80, margin: '0 auto', borderRadius: '50%', backgroundColor: '#fceef0', display: 'grid', placeItems: 'center', fontSize: 24 }}>🐰</div>
-          <div style={{ marginTop: 10, color: '#475569', fontSize: 14 }}>Đăng ký bằng tài khoản mạng xã hội</div>
+    <div className="auth-page auth-page-register">
+      <div className="auth-shell register-shell auth-enter-up">
+        <h1 className="auth-title">Đăng ký trở thành SMEMBER</h1>
+        <div className="auth-text-center" style={{ marginTop: 8 }}>
+          <div className="register-avatar" aria-hidden="true">SM</div>
+          <div className="auth-subtitle" style={{ marginTop: 12 }}>
+            Đăng ký bằng tài khoản mạng xã hội
+          </div>
         </div>
 
-        <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <button style={{ borderRadius: 8, padding: '10px', border: '1px solid #e2e8f0', backgroundColor: '#fff', fontWeight: 600 }}>Google</button>
-          <button style={{ borderRadius: 8, padding: '10px', border: '1px solid #e2e8f0', backgroundColor: '#fff', fontWeight: 600 }}>Zalo</button>
+        <div className="auth-grid-2 auth-social-grid" style={{ maxWidth: 460, marginInline: 'auto' }}>
+          <button className="auth-ghost-btn">Google</button>
+          <button className="auth-ghost-btn">Zalo</button>
         </div>
 
-        <div style={{ marginTop: 12, textAlign: 'center', color: '#475569', fontSize: 13 }}>Hoặc điền thông tin sau</div>
+        <div className="auth-subtitle" style={{ marginTop: 12 }}>
+          Hoặc điền thông tin sau
+        </div>
 
-        <div style={{ marginTop: 16, border: '1px solid #e2e8f0', borderRadius: 10, padding: 12 }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>Thông tin cá nhân</div>
-          <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr' }}>
+        <div className="auth-box" style={{ marginTop: 16 }}>
+          <div className="auth-box-title">Thông tin cá nhân</div>
+          <div className="auth-grid-2" style={{ marginTop: 0 }}>
             <Input label="Họ và tên" placeholder="Nhập họ và tên" />
             <Input label="Ngày sinh" placeholder="dd/mm/yyyy" type="date" />
             <Input label="Số điện thoại" placeholder="Nhập số điện thoại" />
             <Input label="Email (Không bắt buộc)" placeholder="Nhập email" type="email" />
           </div>
+          <div className="auth-helper-success">✓ Hóa đơn VAT khi mua hàng sẽ được gửi qua email này</div>
         </div>
 
-        <div style={{ marginTop: 14, border: '1px solid #e2e8f0', borderRadius: 10, padding: 12 }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>Tạo mật khẩu</div>
-          <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr' }}>
+        <div className="auth-box">
+          <div className="auth-box-title">Tạo mật khẩu</div>
+          <div className="auth-grid-2" style={{ marginTop: 0 }}>
             <Input label="Mật khẩu" placeholder="Nhập mật khẩu của bạn" type="password" />
             <Input label="Nhập lại mật khẩu" placeholder="Nhập lại mật khẩu của bạn" type="password" />
           </div>
-          <div style={{ color: '#6b7280', fontSize: 12, marginTop: 4 }}>Mật khẩu tối thiểu 6 ký tự, có ít nhất 1 chữ số và 1 chữ hoa.</div>
+          <div className="auth-helper-text">Mật khẩu tối thiểu 6 ký tự, có ít nhất 1 chữ số và 1 chữ hoa.</div>
+
+          <label className="auth-check-line">
+            <input type="checkbox" />
+            <span>Đăng ký nhận tin khuyến mãi từ CellphoneS</span>
+          </label>
+
+          <p className="auth-policy-note">
+            Bằng việc Đăng ký, bạn đã đọc và đồng ý với <a href="/">Điều khoản sử dụng</a> và{' '}
+            <a href="/">Chính sách bảo mật của CellphoneS</a>.
+          </p>
         </div>
 
-        <div style={{ marginTop: 18, display: 'flex', gap: 8 }}>
-          <Link to="/login" style={{ flex: 1, textDecoration: 'none' }}><button style={{ width: '100%', borderRadius: 8, border: '1px solid #e2e8f0', backgroundColor: '#fff', color: '#111', fontWeight: 600, padding: '10px 12px' }}>Quay lại đăng nhập</button></Link>
-          <button style={{ flex: 1, border: 'none', borderRadius: 8, backgroundColor: '#d8001a', color: '#fff', fontWeight: 700, padding: '10px 12px' }}>Hoàn tất đăng ký</button>
+        <div className="auth-box auth-perk-box">
+          <div className="auth-perk-row">
+            <div>
+              <strong>Tôi là Học sinh - sinh viên / Giáo viên - giảng viên</strong>
+              <p>Nhận thêm ưu đãi tối đa 700k/sản phẩm</p>
+            </div>
+            <button type="button" className="auth-toggle" aria-pressed="false" aria-label="Bật ưu đãi sinh viên" />
+          </div>
+
+          <div className="auth-perk-row">
+            <div>
+              <strong>Tôi là Khách hàng Doanh nghiệp</strong>
+              <p>Nhận quyền lợi hấp dẫn lên đến 1 triệu/đơn hàng</p>
+            </div>
+            <button type="button" className="auth-toggle" aria-pressed="false" aria-label="Bật ưu đãi doanh nghiệp" />
+          </div>
+        </div>
+
+        <div className="auth-action-row">
+          <Link to="/login" style={{ flex: 1, textDecoration: 'none' }}>
+            <button className="auth-ghost-btn">Quay lại trang đăng nhập</button>
+          </Link>
+          <button className="auth-primary-btn" style={{ flex: 1, marginTop: 0 }}>Hoàn tất đăng ký</button>
         </div>
       </div>
     </div>

@@ -2,37 +2,82 @@
 
 function Input({ label, ...props }) {
   return (
-    <label style={{ display: 'grid', gap: 6, fontSize: 14, color: '#1f2937' }}>
-      <span style={{ fontWeight: 600 }}>{label}</span>
-      <input {...props} style={{ width: '100%', borderRadius: 10, border: '1px solid #e2e8f0', backgroundColor: '#fff', padding: '10px 12px', outline: 'none', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }} />
+    <label className="auth-input-label">
+      <span>{label}</span>
+      <input {...props} className="auth-input" />
     </label>
   );
 }
 
 export default function LogInPage() {
+  const benefits = [
+    'Chiết khấu đến 5% khi mua sản phẩm tại CellphoneS',
+    'Miễn phí giao hàng cho thành viên Smember',
+    'Tặng voucher sinh nhật đến 500.000đ',
+    'Trợ giá thu cũ lên đến 1 triệu',
+    'Đặc quyền ưu đãi thêm đến 10% cho học sinh, sinh viên',
+    'S-Business: Ưu đãi riêng cho khách hàng doanh nghiệp',
+  ];
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', display: 'grid', placeItems: 'center', padding: '18px' }}>
-      <div style={{ width: '100%', maxWidth: 400, backgroundColor: '#fff', borderRadius: 16, padding: '24px 20px', boxShadow: '0 6px 24px rgba(0,0,0,0.08)' }}>
-        <h1 style={{ color: '#d70016', fontSize: '1.6rem', textAlign: 'center', margin: '0 0 20px', fontWeight: 700 }}>Đăng nhập SMEMBER</h1>
+    <div className="auth-page auth-page-login">
+      <div className="auth-shell login-shell">
+        <section className="login-showcase auth-enter-left">
+          <div className="login-brand-row">
+            <span>cellphoneS</span>
+            <span>dienthoaivui</span>
+          </div>
+          <h2>
+            Nhập hội khách hàng thân thiết <strong>SMEMBER</strong>
+          </h2>
+          <p>Để không bỏ lỡ các ưu đãi hấp dẫn từ CellphoneS</p>
 
-        <Input label="Số điện thoại" placeholder="Nhập số điện thoại của bạn" type="tel" />
-        <Input label="Mật khẩu" placeholder="Nhập mật khẩu của bạn" type="password" />
+          <div className="login-benefits-card">
+            <ul>
+              {benefits.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+            <a href="/">Xem chi tiết chính sách ưu đãi Smember</a>
+          </div>
 
-        <button style={{ width: '100%', marginTop: 8, border: 'none', borderRadius: 10, backgroundColor: '#d70016', color: '#fff', fontWeight: 700, padding: '11px 14px', fontSize: 15 }}>Đăng nhập</button>
-        <div style={{ textAlign: 'center', marginTop: 10 }}><Link to="/" style={{ textDecoration: 'none', color: '#0b63d4', fontWeight: 600 }}>Quên mật khẩu?</Link></div>
+          <div className="login-showcase-mascot" aria-hidden="true">
+            Ưu đãi
+          </div>
+        </section>
 
-        <div style={{ marginTop: 18, borderTop: '1px solid #e2e8f0', paddingTop: 10, textAlign: 'center', fontSize: 12, color: '#4b5563' }}>Hoặc đăng nhập bằng</div>
-        <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <button style={{ borderRadius: 10, border: '1px solid #e2e8f0', backgroundColor: '#fff', padding: '8px 6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontWeight: 600 }}>Google</button>
-          <button style={{ borderRadius: 10, border: '1px solid #e2e8f0', backgroundColor: '#fff', padding: '8px 6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontWeight: 600 }}>Zalo</button>
-        </div>
+        <section className="auth-card login-form-card auth-enter-right">
+          <div className="login-inline-alert" role="status" aria-live="polite">
+            <strong>Số điện thoại không được bỏ trống</strong>
+            <span>Vui lòng nhập số điện thoại</span>
+          </div>
 
-        <div style={{ marginTop: 18, textAlign: 'center', fontSize: 14, color: '#334155' }}>
-          Bạn chưa có tài khoản? <Link to="/register" style={{ color: '#d70016', fontWeight: 700 }}>Đăng ký ngay</Link>
-        </div>
-        <div style={{ marginTop: 6, textAlign: 'center', fontSize: 14, color: '#334155' }}>
-          Mua sắm tại <Link to="/" style={{ color: '#d70016', fontWeight: 700 }}>cellphones.com.vn</Link>
-        </div>
+          <h1 className="auth-title">Đăng nhập SMEMBER</h1>
+
+          <div className="auth-form-group">
+            <Input label="Số điện thoại" placeholder="Nhập số điện thoại của bạn" type="tel" />
+            <Input label="Mật khẩu" placeholder="Nhập mật khẩu của bạn" type="password" />
+          </div>
+
+          <button className="auth-primary-btn">Đăng nhập</button>
+          <div className="auth-text-center" style={{ marginTop: 10 }}>
+            <Link to="/" className="auth-link">Quên mật khẩu?</Link>
+          </div>
+
+          <div className="auth-divider">Hoặc đăng nhập bằng</div>
+          <div className="auth-grid-2 auth-social-grid">
+            <button className="auth-ghost-btn">Google</button>
+            <button className="auth-ghost-btn">Zalo</button>
+          </div>
+
+          <div className="auth-text-center" style={{ marginTop: 18, fontSize: 14, color: '#334155' }}>
+            Bạn chưa có tài khoản? <Link to="/register" className="auth-link-strong">Đăng ký ngay</Link>
+          </div>
+          <div className="auth-text-center" style={{ marginTop: 8, fontSize: 14, color: '#334155' }}>
+            Mua sắm tại <Link to="/" className="auth-link-strong">cellphones.com.vn</Link> và{' '}
+            <Link to="/" className="auth-link-strong">dienthoaivui.com.vn</Link>
+          </div>
+        </section>
       </div>
     </div>
   );

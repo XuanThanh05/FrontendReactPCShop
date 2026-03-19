@@ -1,6 +1,7 @@
-﻿import Header from '../../components/layout/Header';
-import { Link } from 'react-router-dom';
+﻿import { useState } from 'react';
+import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import LoginPopup from '../../components/layout/LoginPopup';
 
 const categories = [
   { name: 'Laptop', icon: '💻' },
@@ -28,9 +29,11 @@ const products = [
 ];
 
 export default function Home() {
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
+
   return (
     <div className="home-page">
-      <Header />
+      <Header onLoginClick={() => setShowLoginPopup(true)} />
       <div className="home-content">
         <div className="home-grid">
           <aside className="home-sidebar">
@@ -72,8 +75,8 @@ export default function Home() {
                       </div>
                       <img src={p.image} alt={p.name} />
                     </div>
-                    <div className="product-name">{p.name}</div>
-                    <div className="product-price">{p.price} đ</div>
+                    <div className="home-product-name">{p.name}</div>
+                    <div className="home-product-price">{p.price} đ</div>
                   </div>
                 ))}
               </div>
@@ -82,6 +85,7 @@ export default function Home() {
         </div>
       </div>
       <div className="floating-area"><button>Liên hệ</button></div>
+      <LoginPopup open={showLoginPopup} onClose={() => setShowLoginPopup(false)} />
       <Footer />
     </div>
   );
