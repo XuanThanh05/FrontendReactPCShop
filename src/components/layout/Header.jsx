@@ -20,10 +20,12 @@ export default function Header() {
     item.toLowerCase().includes(keyword.toLowerCase())
   );
   return (
-    <header style={{ backgroundColor: '#d70018', color: '#fff', padding: '8px 0' }}>
-      <div style={{ width: '100%', maxWidth: 1200, margin: '0 auto', padding: '0 12px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Link to="/" style={{ textDecoration: 'none', color: '#fff', fontWeight: 800, letterSpacing: 1.2, fontSize: 20 }}>cellphone<strong>S</strong></Link>
+    <header className="pc-header">
+      <div className="pc-header-inner">
+        <div className="pc-header-brand-wrap">
+          <Link to="/" className="pc-header-brand">
+            cellphone<strong>S</strong>
+          </Link>
         </div>
         <div style={{ position: 'relative', flex: 1, minWidth: 220, margin: '0 8px', maxWidth: 500 }}>
           <input

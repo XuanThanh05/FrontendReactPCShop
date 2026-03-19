@@ -1,6 +1,8 @@
-﻿import Header from '../../components/layout/Header';
-import { Link } from 'react-router-dom';
+﻿import { useEffect, useState } from 'react';
+import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import LoginPopup from '../../components/layout/LoginPopup';
+import './Home.css';
 
 const categories = [
   { name: 'Laptop', icon: '💻' },
@@ -28,9 +30,29 @@ const products = [
 ];
 
 export default function Home() {
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setShowBackToTop(window.scrollY > 320);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
+  const handleBackToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="home-page">
-      <Header />
+      <Header onLoginClick={() => setShowLoginPopup(true)} />
       <div className="home-content">
         <div className="home-grid">
           <aside className="home-sidebar">
@@ -81,7 +103,18 @@ export default function Home() {
           </main>
         </div>
       </div>
-      <div className="floating-area"><button>Liên hệ</button></div>
+      <div className="floating-area">
+        <button
+          type="button"
+          className={`back-to-top-btn${showBackToTop ? ' show' : ''}`}
+          onClick={handleBackToTop}
+          aria-label="Lên đầu trang"
+        >
+          Lên đầu ︿
+        </button>
+        <button type="button">Liên hệ</button>
+      </div>
+      <LoginPopup open={showLoginPopup} onClose={() => setShowLoginPopup(false)} />
       <Footer />
     </div>
   );
