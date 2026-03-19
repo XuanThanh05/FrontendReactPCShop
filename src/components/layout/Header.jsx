@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Header.css';
 
-export default function Header() {
+export default function Header({ onLoginClick }) {
   const [keyword, setKeyword] = useState('');
   const [showSuggest, setShowSuggest] = useState(false);
   const navigate = useNavigate();
@@ -105,7 +105,19 @@ export default function Header() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Link to="/cart" className="header-link" style={{ color: '#fff', textDecoration: 'none', fontWeight: 400 }}>🛒 Giỏ hàng</Link>
-          <Link to="/login" className="header-link" style={{ color: '#fff', textDecoration: 'none', fontWeight: 400 }}>👤 Đăng nhập</Link>
+          <Link
+            to="/login"
+            className="header-link"
+            style={{ color: '#fff', textDecoration: 'none', fontWeight: 400 }}
+            onClick={(e) => {
+              if (onLoginClick) {
+                e.preventDefault();
+                onLoginClick();
+              }
+            }}
+          >
+            👤 Đăng nhập
+          </Link>
         </div>
       </div>
     </header>
