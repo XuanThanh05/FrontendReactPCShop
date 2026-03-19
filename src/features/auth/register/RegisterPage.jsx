@@ -16,19 +16,19 @@ export default function RegisterPage() {
         <h1 className="auth-title">Đăng ký trở thành SMEMBER</h1>
         <div className="auth-text-center" style={{ marginTop: 8 }}>
           <div className="register-avatar" aria-hidden="true">SM</div>
-          <div className="auth-subtitle" style={{ marginTop: 12 }}>
+          {/* <div className="auth-subtitle" style={{ marginTop: 12 }}>
             Đăng ký bằng tài khoản mạng xã hội
-          </div>
+          </div> */}
         </div>
 
         <div className="auth-grid-2 auth-social-grid" style={{ maxWidth: 460, marginInline: 'auto' }}>
-          <button className="auth-ghost-btn">Google</button>
-          <button className="auth-ghost-btn">Zalo</button>
+          {/* <button className="auth-ghost-btn">Google</button>
+          <button className="auth-ghost-btn">Zalo</button> */}
         </div>
 
-        <div className="auth-subtitle" style={{ marginTop: 12 }}>
+        {/* <div className="auth-subtitle" style={{ marginTop: 12 }}>
           Hoặc điền thông tin sau
-        </div>
+        </div> */}
 
         <div className="auth-box" style={{ marginTop: 16 }}>
           <div className="auth-box-title">Thông tin cá nhân</div>
@@ -60,23 +60,23 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <div className="auth-box auth-perk-box">
-          <div className="auth-perk-row">
+        {/* <div className="auth-box auth-perk-box"> */}
+          {/* <div className="auth-perk-row">
             <div>
               <strong>Tôi là Học sinh - sinh viên / Giáo viên - giảng viên</strong>
               <p>Nhận thêm ưu đãi tối đa 700k/sản phẩm</p>
             </div>
             <button type="button" className="auth-toggle" aria-pressed="false" aria-label="Bật ưu đãi sinh viên" />
-          </div>
+          </div> */}
 
-          <div className="auth-perk-row">
-            <div>
+          {/* <div className="auth-perk-row"> */}
+            {/* <div>
               <strong>Tôi là Khách hàng Doanh nghiệp</strong>
               <p>Nhận quyền lợi hấp dẫn lên đến 1 triệu/đơn hàng</p>
-            </div>
-            <button type="button" className="auth-toggle" aria-pressed="false" aria-label="Bật ưu đãi doanh nghiệp" />
-          </div>
-        </div>
+            </div> *
+            <button type="button" className="auth-toggle" aria-pressed="false" aria-label="Bật ưu đãi doanh nghiệp" /> */}
+          {/* </div> */}
+        {/* </div> */}
 
         <div className="auth-action-row">
           <Link to="/login" style={{ flex: 1, textDecoration: 'none' }}>

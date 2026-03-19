@@ -47,10 +47,6 @@ export default function LogInPage() {
         </section>
 
         <section className="auth-card login-form-card auth-enter-right">
-          <div className="login-inline-alert" role="status" aria-live="polite">
-            <strong>Số điện thoại không được bỏ trống</strong>
-            <span>Vui lòng nhập số điện thoại</span>
-          </div>
 
           <h1 className="auth-title">Đăng nhập SMEMBER</h1>
 
