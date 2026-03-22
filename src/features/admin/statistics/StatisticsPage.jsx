@@ -1,28 +1,18 @@
 // ============================================================
-// StatisticsPage.jsx
+// StatisticsPage.jsx - API-driven statistics from backend
 // Yêu cầu cài: npm install recharts
 // ============================================================
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import {
-  LineChart, Line, BarChart, Bar,
   PieChart, Pie, Cell, Tooltip,
-  XAxis, YAxis, CartesianGrid,
-  ResponsiveContainer, Legend,
+  ResponsiveContainer,
 } from "recharts";
 
-import {
-  summaryStats,
-  revenueByMonth,
-  orderStatusData,
-  orderStats,
-  topProducts,
-  warehouseReport,
-  newCustomersByMonth,
-} from "./mockData";
 import { useAuth } from "../../auth/useAuth";
+import * as statisticsService from "../../../services/statisticsService";
 
 import "./StatisticsPage.css";
 
@@ -36,54 +26,99 @@ const formatMillions = (val) => {
   return val.toString();
 };
 
-// ---- Custom Tooltip cho biểu đồ ----
-const RevenueTooltip = ({ active, payload, label }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div style={{ background: "#1c2333", border: "1px solid #30363d", borderRadius: 8, padding: "10px 16px" }}>
-      <p style={{ color: "#8b949e", fontSize: 12, marginBottom: 4 }}>{label}</p>
-      <p style={{ color: "#58a6ff", fontFamily: "Space Mono, monospace", fontWeight: 700 }}>
-        {formatVND(payload[0].value)}
-      </p>
-    </div>
-  );
-};
-
-const CustomerTooltip = ({ active, payload, label }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div style={{ background: "#1c2333", border: "1px solid #30363d", borderRadius: 8, padding: "10px 16px" }}>
-      <p style={{ color: "#8b949e", fontSize: 12, marginBottom: 4 }}>{label}</p>
-      <p style={{ color: "#bc8cff", fontFamily: "Space Mono, monospace", fontWeight: 700 }}>
-        {payload[0].value} khách mới
-      </p>
-    </div>
-  );
-};
-
 // ---- Component chính ----
 export default function StatisticsPage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const [selectedYear, setSelectedYear] = useState("2024");
-  const maxSold = Math.max(...topProducts.map((p) => p.sold));
+  const [stats, setStats] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch tất cả dữ liệu từ API
+        const [summary, orderStatus, topProducts, warehouseReport] = await Promise.all([
+          statisticsService.getSummaryStatistics(),
+          statisticsService.getOrderStatusDistribution(),
+          statisticsService.getTopProducts(),
+          statisticsService.getWarehouseReport(),
+        ]);
+
+        setStats({
+          totalRevenue: summary.totalRevenue || 0,
+          totalOrders: summary.totalOrders || 0,
+          totalCustomers: summary.totalCustomers || 0,
+          orderStatus: orderStatus || [],
+          topProducts: topProducts || [],
+          warehouseReport: warehouseReport || [],
+        });
+      } catch (err) {
+        console.error("Error fetching statistics:", err);
+        setError(err.message || "Không thể tải dữ liệu thống kê");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStatistics();
+  }, []);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
-  const getStockStatus = (item) => {
-    if (item.stock === 0)           return "danger";
-    if (item.stock < item.minStock) return "warn";
-    return "ok";
-  };
+  if (loading) {
+    return <div className="stats-page"><p>Đang tải...</p></div>;
+  }
 
-  const getStatusLabel = (item) => {
-    if (item.stock === 0)           return "Hết hàng";
-    if (item.stock < item.minStock) return "Sắp hết";
-    return "Còn hàng";
-  };
+  if (error) {
+    return (
+      <div className="stats-page">
+        <div className="stats-topbar">
+          <div className="stats-topbar-links">
+            <Link to="/" className="stats-nav-btn">← Về trang chủ</Link>
+            <Link to="/admin/users" className="stats-nav-btn">Quản lý user</Link>
+          </div>
+          <button type="button" className="stats-nav-btn danger" onClick={handleLogout}>
+            Đăng xuất
+          </button>
+        </div>
+        <p style={{ color: "red", padding: "20px" }}>Lỗi: {error}</p>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return <div className="stats-page"><p>Không có dữ liệu</p></div>;
+  }
+
+  // Chuẩn bị dữ liệu cho Pie chart - chuyển từ API format
+  const orderStatusData = stats.orderStatus
+    ?.map((item) => {
+      const statusColors = {
+        PAID: "#10b981",
+        PENDING: "#f59e0b",
+        PROCESSING: "#3b82f6",
+        SHIPPING: "#8b5cf6",
+        COMPLETED: "#06b6d4",
+        CANCELLED: "#ef4444",
+      };
+      return {
+        name: item.status,
+        value: item.count,
+        color: statusColors[item.status] || "#94a3b8",
+      };
+    })
+    .filter((item) => item.value > 0) || [];
+
+  const maxSold = stats.topProducts?.length > 0 
+    ? Math.max(...stats.topProducts.map(p => p.quantity))
+    : 1;
 
   return (
     <div className="stats-page">
@@ -103,14 +138,6 @@ export default function StatisticsPage() {
           <h1>📊 Thống kê & Báo cáo</h1>
           <p>Tổng quan hoạt động kinh doanh — Cập nhật mới nhất</p>
         </div>
-        <select
-          className="year-select"
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(e.target.value)}
-        >
-          <option value="2024">Năm 2024</option>
-          <option value="2023">Năm 2023</option>
-        </select>
       </div>
 
       {/* ---- Summary Cards ---- */}
@@ -118,151 +145,98 @@ export default function StatisticsPage() {
         <div className="summary-card blue">
           <div className="card-icon">💰</div>
           <div className="card-label">Tổng Doanh Thu</div>
-          <div className="card-value">{formatMillions(summaryStats.totalRevenue)}</div>
-          <div className="card-growth up">
-            ▲ {summaryStats.revenueGrowth}% so với tháng trước
-          </div>
+          <div className="card-value">{formatMillions(stats.totalRevenue)}</div>
         </div>
 
         <div className="summary-card green">
           <div className="card-icon">🛒</div>
           <div className="card-label">Tổng Đơn Hàng</div>
-          <div className="card-value">{summaryStats.totalOrders}</div>
-          <div className="card-growth up">
-            ▲ {summaryStats.orderGrowth}% so với tháng trước
-          </div>
+          <div className="card-value">{stats.totalOrders}</div>
         </div>
 
         <div className="summary-card purple">
           <div className="card-icon">👥</div>
           <div className="card-label">Khách Hàng</div>
-          <div className="card-value">{summaryStats.totalCustomers}</div>
-          <div className="card-growth up">
-            ▲ {summaryStats.customerGrowth}% so với tháng trước
-          </div>
-        </div>
-
-        <div className="summary-card yellow">
-          <div className="card-icon">📦</div>
-          <div className="card-label">Sản Phẩm Sắp Hết</div>
-          <div className="card-value">{summaryStats.lowStockItems}</div>
-          <div className="card-growth warn">
-            ⚠ Cần nhập thêm hàng
-          </div>
+          <div className="card-value">{stats.totalCustomers}</div>
         </div>
       </div>
 
-      {/* ---- Revenue Chart + Order Status ---- */}
+      {/* ---- Order Status + Top Products ---- */}
       <div className="charts-grid">
-
-        {/* Doanh thu theo tháng */}
-        <div className="chart-card">
-          <div className="chart-card-header">
-            <h2>Doanh Thu Theo Tháng</h2>
-            <span className="chart-badge blue">{selectedYear}</span>
-          </div>
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={revenueByMonth} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#21262d" />
-              <XAxis dataKey="month" tick={{ fill: "#8b949e", fontSize: 12 }} axisLine={false} tickLine={false} />
-              <YAxis tickFormatter={formatMillions} tick={{ fill: "#8b949e", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip content={<RevenueTooltip />} />
-              <Line
-                type="monotone"
-                dataKey="revenue"
-                stroke="#58a6ff"
-                strokeWidth={2.5}
-                dot={{ fill: "#58a6ff", r: 3, strokeWidth: 0 }}
-                activeDot={{ r: 5, fill: "#58a6ff" }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
 
         {/* Trạng thái đơn hàng */}
         <div className="chart-card">
           <div className="chart-card-header">
             <h2>Trạng Thái Đơn Hàng</h2>
-            <span className="chart-badge green">Tổng: {orderStats.total}</span>
+            <span className="chart-badge green">Tổng: {stats.totalOrders}</span>
           </div>
-          <ResponsiveContainer width="100%" height={160}>
-            <PieChart>
-              <Pie
-                data={orderStatusData}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={75}
-                paddingAngle={3}
-                dataKey="value"
-              >
-                {orderStatusData.map((entry, index) => (
-                  <Cell key={index} fill={entry.color} />
+          {orderStatusData.length > 0 ? (
+            <>
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={orderStatusData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={45}
+                    outerRadius={70}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {orderStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
+                    itemStyle={{ color: "#0f172a" }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="order-legend">
+                {orderStatusData.map((item, i) => (
+                  <div className="order-legend-item" key={i}>
+                    <span className="legend-left">
+                      <span className="legend-dot" style={{ background: item.color }} />
+                      {item.name}
+                    </span>
+                    <span className="legend-count">{item.value}</span>
+                  </div>
                 ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{ background: "#1c2333", border: "1px solid #30363d", borderRadius: 8, fontSize: 12 }}
-                itemStyle={{ color: "#e6edf3" }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="order-legend">
-            {orderStatusData.map((item, i) => (
-              <div className="order-legend-item" key={i}>
-                <span className="legend-left">
-                  <span className="legend-dot" style={{ background: item.color }} />
-                  {item.name}
-                </span>
-                <span className="legend-count">{item.value}</span>
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            <div className="no-data">Chưa có dữ liệu</div>
+          )}
         </div>
-      </div>
-
-      {/* ---- Top Products + Customers ---- */}
-      <div className="charts-grid-2">
 
         {/* Sản phẩm bán chạy */}
         <div className="chart-card">
           <div className="chart-card-header">
             <h2>Sản Phẩm Bán Chạy</h2>
-            <span className="chart-badge purple">Top {topProducts.length}</span>
+            <span className="chart-badge purple">Top {stats.topProducts.length}</span>
           </div>
-          <div className="product-list">
-            {topProducts.map((p, i) => (
-              <div className="product-item" key={i}>
-                <span className="product-rank">#{i + 1}</span>
-                <div className="product-info">
-                  <div className="product-name">{p.name}</div>
-                  <div className="product-bar-wrap">
-                    <div
-                      className="product-bar"
-                      style={{ width: `${(p.sold / maxSold) * 100}%` }}
-                    />
+          {stats.topProducts.length > 0 ? (
+            <div className="product-list">
+              {stats.topProducts.map((p, i) => (
+                <div className="product-item" key={i}>
+                  <span className="product-rank">#{i + 1}</span>
+                  <div className="product-info">
+                    <div className="product-name">{p.name}</div>
+                    <div className="product-bar-wrap">
+                      <div
+                        className="product-bar"
+                        style={{ width: `${(p.quantity / maxSold) * 100}%` }}
+                      />
+                    </div>
                   </div>
+                  <span className="product-sold">{p.quantity}</span>
                 </div>
-                <span className="product-sold">{p.sold}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Khách hàng mới theo tháng */}
-        <div className="chart-card">
-          <div className="chart-card-header">
-            <h2>Khách Hàng Mới Theo Tháng</h2>
-            <span className="chart-badge yellow">{selectedYear}</span>
-          </div>
-          <ResponsiveContainer width="100%" height={230}>
-            <BarChart data={newCustomersByMonth} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#21262d" />
-              <XAxis dataKey="month" tick={{ fill: "#8b949e", fontSize: 12 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "#8b949e", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomerTooltip />} />
-              <Bar dataKey="customers" fill="#bc8cff" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+              ))}
+            </div>
+          ) : (
+            <div className="no-data">Chưa có dữ liệu</div>
+          )}
         </div>
       </div>
 
@@ -270,48 +244,37 @@ export default function StatisticsPage() {
       <div className="warehouse-card">
         <div className="chart-card-header">
           <h2>📦 Báo Cáo Kho Hàng</h2>
-          <span className="chart-badge yellow">
-            {warehouseReport.filter(i => i.stock < i.minStock).length} sản phẩm cần nhập
-          </span>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Tên Sản Phẩm</th>
-              <th>Danh Mục</th>
-              <th>Đã Nhập</th>
-              <th>Đã Bán</th>
-              <th>Tồn Kho</th>
-              <th>Trạng Thái</th>
-            </tr>
-          </thead>
-          <tbody>
-            {warehouseReport.map((item) => {
-              const s = getStockStatus(item);
-              return (
-                <tr key={item.id}>
-                  <td style={{ color: "var(--text-muted)", fontFamily: "Space Mono, monospace", fontSize: 12 }}>
-                    {String(item.id).padStart(2, "0")}
-                  </td>
-                  <td style={{ fontWeight: 500 }}>{item.name}</td>
-                  <td><span className="category-badge">{item.category}</span></td>
-                  <td style={{ fontFamily: "Space Mono, monospace" }}>{item.imported}</td>
-                  <td style={{ fontFamily: "Space Mono, monospace" }}>{item.sold}</td>
-                  <td>
-                    <span className={`stock-num ${s}`}>{item.stock}</span>
-                    <span style={{ color: "var(--text-muted)", fontSize: 11, marginLeft: 4 }}>
-                      (min: {item.minStock})
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`status-badge ${s}`}>{getStatusLabel(item)}</span>
-                  </td>
+        {stats.warehouseReport && stats.warehouseReport.length > 0 ? (
+          <div className="warehouse-table-wrap">
+            <table className="warehouse-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Tên Sản Phẩm</th>
+                  <th>Danh Mục</th>
+                  <th>Tồn Kho</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {stats.warehouseReport.map((item, idx) => (
+                  <tr key={item.id}>
+                    <td className="col-id">{String(idx + 1).padStart(2, "0")}</td>
+                    <td className="col-name">{item.name}</td>
+                    <td className="col-category"><span className="category-badge">{item.category}</span></td>
+                    <td className="col-stock">
+                      <span className={`stock-num ${item.stockQuantity > 0 ? "ok" : "danger"}`}>
+                        {item.stockQuantity}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="no-data">Chưa có dữ liệu</div>
+        )}
       </div>
 
     </div>
