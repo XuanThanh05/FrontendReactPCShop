@@ -17,7 +17,7 @@ function Input({ label, ...props }) {
 export default function LogInPage() {
   const { login, currentUser } = useAuth();
   const navigate = useNavigate();
-  const [phone, setPhone] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,13 +33,13 @@ export default function LogInPage() {
 
   const fillDemoCredentials = (type) => {
     if (type === 'admin') {
-      setPhone('0909000000');
+      setUsername('admin');
       setPassword('admin123');
       setErrorMessage('');
       return;
     }
 
-    setPhone('0909000001');
+    setUsername('userdemo');
     setPassword('user123');
     setErrorMessage('');
   };
@@ -63,14 +63,14 @@ export default function LogInPage() {
     event.preventDefault();
     setErrorMessage('');
 
-    if (!phone.trim() || !password.trim()) {
-      setErrorMessage('Vui lòng nhập đầy đủ số điện thoại và mật khẩu.');
+    if (!username.trim() || !password.trim()) {
+      setErrorMessage('Vui lòng nhập đầy đủ username và mật khẩu.');
       return;
     }
 
     try {
       setIsSubmitting(true);
-      const user = await login({ phone, password });
+      const user = await login({ username, password });
       navigate(user.role === 'admin' ? '/admin/users' : '/');
     } catch (error) {
       setErrorMessage(error?.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
@@ -128,11 +128,11 @@ export default function LogInPage() {
             <div className="login-demo-actions">
               <button type="button" className="login-demo-btn" onClick={() => fillDemoCredentials('user')}>
                 <strong>User demo</strong>
-                <small>0909000001 / user123</small>
+                <small>userdemo / user123</small>
               </button>
               <button type="button" className="login-demo-btn" onClick={() => fillDemoCredentials('admin')}>
                 <strong>Admin demo</strong>
-                <small>0909000000 / admin123</small>
+                <small>admin / admin123</small>
               </button>
             </div>
           </div>
@@ -140,11 +140,11 @@ export default function LogInPage() {
           <form onSubmit={handleSubmit}>
             <div className="auth-form-group">
               <Input
-                label="Số điện thoại"
-                placeholder="Nhập số điện thoại của bạn"
-                type="tel"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
+                label="Username"
+                placeholder="Nhập username của bạn"
+                type="text"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
               />
               <Input
                 label="Mật khẩu"

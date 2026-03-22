@@ -1,6 +1,9 @@
 ﻿import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../AuthBase.css';
 import './RegisterPage.css';
+import { useAuth } from '../useAuth';
 
 function Input({ label, ...props }) {
   return (
@@ -12,6 +15,64 @@ function Input({ label, ...props }) {
 }
 
 export default function RegisterPage() {
+  const { register, currentUser } = useAuth();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({
+    fullName: '',
+    username: '',
+    phone: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    navigate(currentUser.role === 'admin' ? '/admin/users' : '/', { replace: true });
+  }, [currentUser, navigate]);
+
+  const updateField = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setErrorMessage('');
+
+    if (!form.fullName.trim() || !form.username.trim() || !form.password.trim() || !form.confirmPassword.trim()) {
+      setErrorMessage('Vui lòng nhập đầy đủ họ tên, username và mật khẩu.');
+      return;
+    }
+
+    if (form.password.length < 6) {
+      setErrorMessage('Mật khẩu phải có ít nhất 6 ký tự.');
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setErrorMessage('Mật khẩu xác nhận không khớp.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await register({
+        fullName: form.fullName,
+        username: form.username,
+        password: form.password,
+        email: form.email,
+        phone: form.phone,
+      });
+      navigate('/');
+    } catch (error) {
+      setErrorMessage(error?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="auth-page auth-page-register">
       <div className="auth-shell register-shell auth-enter-up">
@@ -32,35 +93,75 @@ export default function RegisterPage() {
           Hoặc điền thông tin sau
         </div> */}
 
-        <div className="auth-box" style={{ marginTop: 16 }}>
-          <div className="auth-box-title">Thông tin cá nhân</div>
-          <div className="auth-grid-2" style={{ marginTop: 0 }}>
-            <Input label="Họ và tên" placeholder="Nhập họ và tên" />
-            <Input label="Ngày sinh" placeholder="dd/mm/yyyy" type="date" />
-            <Input label="Số điện thoại" placeholder="Nhập số điện thoại" />
-            <Input label="Email (Không bắt buộc)" placeholder="Nhập email" type="email" />
+        <form onSubmit={handleSubmit}>
+          <div className="auth-box" style={{ marginTop: 16 }}>
+            <div className="auth-box-title">Thông tin cá nhân</div>
+            <div className="auth-grid-2" style={{ marginTop: 0 }}>
+              <Input
+                label="Họ và tên"
+                placeholder="Nhập họ và tên"
+                value={form.fullName}
+                onChange={(event) => updateField('fullName', event.target.value)}
+              />
+              <Input
+                label="Username"
+                placeholder="Nhập username"
+                value={form.username}
+                onChange={(event) => updateField('username', event.target.value)}
+              />
+              <Input
+                label="Số điện thoại (Không bắt buộc)"
+                placeholder="Nhập số điện thoại"
+                value={form.phone}
+                onChange={(event) => updateField('phone', event.target.value)}
+              />
+              <Input
+                label="Email (Không bắt buộc)"
+                placeholder="Nhập email"
+                type="email"
+                value={form.email}
+                onChange={(event) => updateField('email', event.target.value)}
+              />
+            </div>
+            <div className="auth-helper-success">✓ Hóa đơn VAT khi mua hàng sẽ được gửi qua email này</div>
           </div>
-          <div className="auth-helper-success">✓ Hóa đơn VAT khi mua hàng sẽ được gửi qua email này</div>
-        </div>
 
-        <div className="auth-box">
-          <div className="auth-box-title">Tạo mật khẩu</div>
-          <div className="auth-grid-2" style={{ marginTop: 0 }}>
-            <Input label="Mật khẩu" placeholder="Nhập mật khẩu của bạn" type="password" />
-            <Input label="Nhập lại mật khẩu" placeholder="Nhập lại mật khẩu của bạn" type="password" />
+          <div className="auth-box">
+            <div className="auth-box-title">Tạo mật khẩu</div>
+            <div className="auth-grid-2" style={{ marginTop: 0 }}>
+              <Input
+                label="Mật khẩu"
+                placeholder="Nhập mật khẩu của bạn"
+                type="password"
+                value={form.password}
+                onChange={(event) => updateField('password', event.target.value)}
+              />
+              <Input
+                label="Nhập lại mật khẩu"
+                placeholder="Nhập lại mật khẩu của bạn"
+                type="password"
+                value={form.confirmPassword}
+                onChange={(event) => updateField('confirmPassword', event.target.value)}
+              />
+            </div>
+            <div className="auth-helper-text">Mật khẩu tối thiểu 6 ký tự.</div>
+
+            <label className="auth-check-line">
+              <input type="checkbox" />
+              <span>Đăng ký nhận tin khuyến mãi từ CellphoneS</span>
+            </label>
+
+            <p className="auth-policy-note">
+              Bằng việc Đăng ký, bạn đã đọc và đồng ý với <a href="/">Điều khoản sử dụng</a> và{' '}
+              <a href="/">Chính sách bảo mật của CellphoneS</a>.
+            </p>
           </div>
-          <div className="auth-helper-text">Mật khẩu tối thiểu 6 ký tự, có ít nhất 1 chữ số và 1 chữ hoa.</div>
 
-          <label className="auth-check-line">
-            <input type="checkbox" />
-            <span>Đăng ký nhận tin khuyến mãi từ CellphoneS</span>
-          </label>
-
-          <p className="auth-policy-note">
-            Bằng việc Đăng ký, bạn đã đọc và đồng ý với <a href="/">Điều khoản sử dụng</a> và{' '}
-            <a href="/">Chính sách bảo mật của CellphoneS</a>.
-          </p>
-        </div>
+          {errorMessage ? (
+            <div className="auth-helper-text" style={{ color: '#b91c1c', marginTop: 12 }}>
+              {errorMessage}
+            </div>
+          ) : null}
 
         {/* <div className="auth-box auth-perk-box"> */}
           {/* <div className="auth-perk-row">
@@ -80,12 +181,20 @@ export default function RegisterPage() {
           {/* </div> */}
         {/* </div> */}
 
-        <div className="auth-action-row">
-          <Link to="/login" style={{ flex: 1, textDecoration: 'none' }}>
-            <button className="auth-ghost-btn">Quay lại trang đăng nhập</button>
-          </Link>
-          <button className="auth-primary-btn" style={{ flex: 1, marginTop: 0 }}>Hoàn tất đăng ký</button>
-        </div>
+          <div className="auth-action-row">
+            <Link to="/login" style={{ flex: 1, textDecoration: 'none' }}>
+              <button type="button" className="auth-ghost-btn">Quay lại trang đăng nhập</button>
+            </Link>
+            <button
+              className="auth-primary-btn"
+              style={{ flex: 1, marginTop: 0 }}
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Đang đăng ký...' : 'Hoàn tất đăng ký'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

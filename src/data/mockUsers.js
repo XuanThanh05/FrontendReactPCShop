@@ -2,6 +2,7 @@ export const MOCK_USERS = [
   {
     id: "u-admin-01",
     fullName: "Quản trị viên",
+    username: "admin",
     phone: "0909000000",
     password: "admin123",
     email: "admin@pcshop.local",
@@ -12,6 +13,7 @@ export const MOCK_USERS = [
   {
     id: "u-user-01",
     fullName: "Khách hàng demo",
+    username: "userdemo",
     phone: "0909000001",
     password: "user123",
     email: "user@pcshop.local",

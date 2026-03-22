@@ -4,6 +4,36 @@ const USERS_STORAGE_KEY = "pcshop_mock_users";
 const AUTH_STORAGE_KEY = "pcshop_current_user";
 const AUTH_CHANGED_EVENT = "pcshop_auth_changed";
 
+function sanitizeText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeUsername(value) {
+  return sanitizeText(value).toLowerCase();
+}
+
+function getDemoUsername(user) {
+  if (user?.id === "u-admin-01") return "admin";
+  if (user?.id === "u-user-01") return "userdemo";
+  return "";
+}
+
+function normalizeUserRecord(user, index) {
+  const fallbackUsername =
+    getDemoUsername(user) ||
+    sanitizeText(user?.username) ||
+    sanitizeText(user?.email).split("@")[0] ||
+    `user${index + 1}`;
+
+  return {
+    ...user,
+    username: normalizeUsername(fallbackUsername),
+    phone: sanitizeText(user?.phone),
+    fullName: sanitizeText(user?.fullName),
+    email: sanitizeText(user?.email),
+  };
+}
+
 function stripPassword(user) {
   if (!user) return null;
   const { password: _PASSWORD, ...safeUser } = user;
@@ -38,8 +68,13 @@ function emitAuthChanged(user) {
 export function initializeMockUsers() {
   const existingUsers = readUsersFromStorage();
   if (!existingUsers || existingUsers.length === 0) {
-    writeUsersToStorage(MOCK_USERS);
+    writeUsersToStorage(MOCK_USERS.map(normalizeUserRecord));
+    return;
   }
+
+  // Migrate existing localStorage records to include normalized username fields.
+  const normalizedUsers = existingUsers.map(normalizeUserRecord);
+  writeUsersToStorage(normalizedUsers);
 }
 
 export function getAllUsers() {
@@ -48,16 +83,18 @@ export function getAllUsers() {
   return users.map(stripPassword);
 }
 
-export function loginWithMock({ phone, password }) {
+export function loginWithMock({ username, password }) {
   initializeMockUsers();
   const users = readUsersFromStorage() || [];
 
+  const normalizedUsername = normalizeUsername(username);
+
   const matchedUser = users.find(
-    (item) => item.phone.trim() === phone.trim() && item.password === password
+    (item) => item.username === normalizedUsername && item.password === password
   );
 
   if (!matchedUser) {
-    throw new Error("Sai số điện thoại hoặc mật khẩu.");
+    throw new Error("Sai username hoặc mật khẩu.");
   }
 
   if (!matchedUser.isActive) {
@@ -65,6 +102,50 @@ export function loginWithMock({ phone, password }) {
   }
 
   const safeUser = stripPassword(matchedUser);
+  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(safeUser));
+  emitAuthChanged(safeUser);
+  return safeUser;
+}
+
+export function registerWithMock({
+  fullName,
+  username,
+  password,
+  email,
+  phone,
+}) {
+  initializeMockUsers();
+  const users = readUsersFromStorage() || [];
+
+  const normalizedUsername = normalizeUsername(username);
+  if (!normalizedUsername) {
+    throw new Error("Username không được để trống.");
+  }
+
+  const existed = users.some((item) => item.username === normalizedUsername);
+  if (existed) {
+    throw new Error("Username đã tồn tại. Vui lòng chọn username khác.");
+  }
+
+  const newUser = normalizeUserRecord(
+    {
+      id: `u-${Date.now()}`,
+      fullName,
+      username: normalizedUsername,
+      phone,
+      password,
+      email,
+      role: "user",
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    },
+    users.length
+  );
+
+  const updatedUsers = [...users, newUser];
+  writeUsersToStorage(updatedUsers);
+
+  const safeUser = stripPassword(newUser);
   localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(safeUser));
   emitAuthChanged(safeUser);
   return safeUser;
@@ -113,7 +194,7 @@ export function updateUserById(userId, updater) {
 }
 
 export function resetMockUsers() {
-  writeUsersToStorage(MOCK_USERS);
+  writeUsersToStorage(MOCK_USERS.map(normalizeUserRecord));
 }
 
 export function subscribeAuthChanges(listener) {

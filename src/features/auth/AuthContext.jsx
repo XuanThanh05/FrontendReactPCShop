@@ -3,6 +3,7 @@ import {
   initializeMockUsers,
   isAdminUser,
   loginWithMock,
+  registerWithMock,
   logoutMock,
   getCurrentUser,
   subscribeAuthChanges,
@@ -47,6 +48,12 @@ export default function AuthProvider({ children }) {
     return loggedInUser;
   };
 
+  const register = async (payload) => {
+    const createdUser = registerWithMock(payload);
+    setCurrentUser(createdUser);
+    return createdUser;
+  };
+
   const logout = () => {
     logoutMock();
     setCurrentUser(null);
@@ -58,6 +65,7 @@ export default function AuthProvider({ children }) {
       isAuthenticated: Boolean(currentUser),
       isAdmin: isAdminUser(currentUser),
       login,
+      register,
       logout,
       refreshSession: () => setCurrentUser(getCurrentUser()),
     }),

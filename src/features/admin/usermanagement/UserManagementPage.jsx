@@ -31,7 +31,8 @@ export default function UserManagementPage() {
       const matchedQuery =
         !normalizedQuery ||
         user.fullName.toLowerCase().includes(normalizedQuery) ||
-        user.phone.includes(normalizedQuery) ||
+        user.username?.toLowerCase().includes(normalizedQuery) ||
+        user.phone?.includes(normalizedQuery) ||
         user.email.toLowerCase().includes(normalizedQuery);
 
       const matchedRole = roleFilter === "all" || user.role === roleFilter;
@@ -101,7 +102,7 @@ export default function UserManagementPage() {
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Tìm theo tên, số điện thoại, email"
+            placeholder="Tìm theo tên, username, số điện thoại, email"
           />
           <select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value)}>
             <option value="all">Tất cả quyền</option>
@@ -120,6 +121,7 @@ export default function UserManagementPage() {
             <thead>
               <tr>
                 <th>Họ tên</th>
+                <th>Username</th>
                 <th>Số điện thoại</th>
                 <th>Email</th>
                 <th>Vai trò</th>
@@ -138,7 +140,8 @@ export default function UserManagementPage() {
                       <strong>{user.fullName}</strong>
                       {isCurrentUser ? <span className="current-tag">Tài khoản của bạn</span> : null}
                     </td>
-                    <td>{user.phone}</td>
+                    <td>{user.username || '-'}</td>
+                    <td>{user.phone || '-'}</td>
                     <td>{user.email}</td>
                     <td>
                       <span className={`role-badge ${user.role}`}>{user.role}</span>
