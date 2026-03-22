@@ -31,19 +31,6 @@ export default function LogInPage() {
     'S-Business: Ưu đãi riêng cho khách hàng doanh nghiệp',
   ];
 
-  const fillDemoCredentials = (type) => {
-    if (type === 'admin') {
-      setUsername('admin');
-      setPassword('admin123');
-      setErrorMessage('');
-      return;
-    }
-
-    setUsername('userdemo');
-    setPassword('user123');
-    setErrorMessage('');
-  };
-
   useEffect(() => {
     if (!errorMessage) return;
 
@@ -124,17 +111,7 @@ export default function LogInPage() {
 
           <h1 className="auth-title">Đăng nhập SMEMBER</h1>
           <div className="login-account-hint">
-            <span>Chọn nhanh tài khoản demo:</span>
-            <div className="login-demo-actions">
-              <button type="button" className="login-demo-btn" onClick={() => fillDemoCredentials('user')}>
-                <strong>User demo</strong>
-                <small>userdemo / user123</small>
-              </button>
-              <button type="button" className="login-demo-btn" onClick={() => fillDemoCredentials('admin')}>
-                <strong>Admin demo</strong>
-                <small>admin / admin123</small>
-              </button>
-            </div>
+            <span>Đăng nhập bằng tài khoản đã đăng ký trên backend.</span>
           </div>
 
           <form onSubmit={handleSubmit}>

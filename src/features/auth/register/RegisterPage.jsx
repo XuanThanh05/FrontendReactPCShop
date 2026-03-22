@@ -41,13 +41,13 @@ export default function RegisterPage() {
     event.preventDefault();
     setErrorMessage('');
 
-    if (!form.fullName.trim() || !form.username.trim() || !form.password.trim() || !form.confirmPassword.trim()) {
-      setErrorMessage('Vui lòng nhập đầy đủ họ tên, username và mật khẩu.');
+    if (!form.fullName.trim() || !form.username.trim() || !form.email.trim() || !form.password.trim() || !form.confirmPassword.trim()) {
+      setErrorMessage('Vui lòng nhập đầy đủ họ tên, username, email và mật khẩu.');
       return;
     }
 
-    if (form.password.length < 6) {
-      setErrorMessage('Mật khẩu phải có ít nhất 6 ký tự.');
+    if (form.password.length < 8) {
+      setErrorMessage('Mật khẩu phải có ít nhất 8 ký tự.');
       return;
     }
 
@@ -59,11 +59,9 @@ export default function RegisterPage() {
     try {
       setIsSubmitting(true);
       await register({
-        fullName: form.fullName,
         username: form.username,
         password: form.password,
         email: form.email,
-        phone: form.phone,
       });
       navigate('/');
     } catch (error) {
@@ -110,13 +108,13 @@ export default function RegisterPage() {
                 onChange={(event) => updateField('username', event.target.value)}
               />
               <Input
-                label="Số điện thoại (Không bắt buộc)"
+                label="Số điện thoại (Tạm thời chưa dùng)"
                 placeholder="Nhập số điện thoại"
                 value={form.phone}
                 onChange={(event) => updateField('phone', event.target.value)}
               />
               <Input
-                label="Email (Không bắt buộc)"
+                label="Email"
                 placeholder="Nhập email"
                 type="email"
                 value={form.email}
@@ -144,7 +142,7 @@ export default function RegisterPage() {
                 onChange={(event) => updateField('confirmPassword', event.target.value)}
               />
             </div>
-            <div className="auth-helper-text">Mật khẩu tối thiểu 6 ký tự.</div>
+            <div className="auth-helper-text">Mật khẩu tối thiểu 8 ký tự.</div>
 
             <label className="auth-check-line">
               <input type="checkbox" />
