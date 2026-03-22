@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
@@ -126,7 +126,7 @@ export default function Header({ onLoginClick }) {
 
           {currentUser ? (
             <>
-              <span className="header-user-label">Xin chào, {currentUser.fullName}</span>
+              <Link to="/account" className="header-user-label" style={{textDecoration: 'none', cursor: 'pointer'}}>Xin chào, {currentUser.fullName}</Link>
               <button
                 type="button"
                 className="header-link header-link-button"
