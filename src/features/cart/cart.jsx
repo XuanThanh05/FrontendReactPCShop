@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
+import axiosClient from "../../services/axiosClient";
 import "./Cart.css";
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -51,33 +52,7 @@ const LensIcon = () => (
 );
 
 // ── Mock data ─────────────────────────────────────────────────────────────────
-const INITIAL_ITEMS = [
-  {
-    id: 1,
-    name: "Tecno Pova 7 8GB 128GB-Nâu",
-    price: 4490000,
-    originalPrice: 4990000,
-    qty: 3,
-    selected: true,
-    image: "https://cdn2.cellphones.com.vn/insecure/rs:fill:358:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-tecno-pova-7_8_.png",
-    promo: "Giảm thêm 10% cho Loa, Tai nghe, Máy tính bàn, TV (từ 10 triệu) khi mua Điện thoại/Laptop",
-    addons: [
-      { id: "sim", label: "Mua kèm sim giảm thêm 50K", badge: "Giảm tối đa 50.000đ", icon: "sim" },
-      { id: "lens", label: "Mua kèm ống kính camera", badge: "Giảm thêm 5%", icon: "lens" },
-    ],
-  },
-  {
-    id: 2,
-    name: "Laptop ASUS Vivobook S 14 FLIP TP3402VA-LZ632W-Bạc",
-    price: 19000000,
-    originalPrice: 22000000,
-    qty: 1,
-    selected: false,
-    image: "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/l/a/laptop_asus_vivobook_s_14_flip_tp3402va-lz632w_-_2.png",
-    promo: null,
-    addons: [],
-  },
-];
+// Removed - sẽ lấy từ API backend
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const fmt = (n) => n.toLocaleString("vi-VN") + "đ";
@@ -182,8 +157,64 @@ function CartItem({ item, onSelect, onQtyChange, onRemove }) {
 export default function Cart() {
   const navigate = useNavigate();
   const { currentUser, isAdmin, logout } = useAuth();
-  const [items, setItems] = useState(INITIAL_ITEMS);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectAll, setSelectAll] = useState(false);
+
+  // Fetch cart data từ API
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        // Lấy user info từ localStorage (pcshop_auth_cache)
+        const authCache = localStorage.getItem('pcshop_auth_cache');
+        if (!authCache) {
+          console.warn("Không tìm thấy pcshop_auth_cache trong localStorage");
+          setLoading(false);
+          return;
+        }
+
+        const user = JSON.parse(authCache);
+        const customerId = user.customerId;
+        
+        if (!customerId) {
+          console.warn("Không có customerId trong auth cache");
+          setLoading(false);
+          return;
+        }
+
+        console.log("Fetching cart for customerId:", customerId);
+
+        // Gọi API để lấy cart
+        const res = await axiosClient.get(`/cart/${customerId}`);
+        console.log("Cart response:", res.data);
+        const cartData = res.data;
+
+        // Transform API response to match component format
+        const transformedItems = cartData.cartItems.map((item) => ({
+          id: item.id,
+          name: item.product.name,
+          price: item.product.price,
+          originalPrice: item.product.price, // Backend không có originalPrice
+          qty: item.quantity,
+          selected: false,
+          image: item.product.imageUrl,
+          promo: null,
+          addons: [],
+          discount: item.product.discount,
+        }));
+
+        console.log("Transformed items:", transformedItems);
+        setItems(transformedItems);
+      } catch (err) {
+        console.error("Lỗi khi lấy giỏ hàng:", err);
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCart();
+  }, []);
 
   const toggleSelect = (id) =>
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, selected: !i.selected } : i)));
@@ -271,7 +302,11 @@ export default function Cart() {
               </button>
             </div>
 
-            {items.length === 0 ? (
+            {loading ? (
+              <div className="cart-empty">
+                <div className="cart-empty__text">Đang tải giỏ hàng...</div>
+              </div>
+            ) : items.length === 0 ? (
               <div className="cart-empty">
                 <div className="cart-empty__icon">🛒</div>
                 <div className="cart-empty__text">Giỏ hàng của bạn đang trống</div>

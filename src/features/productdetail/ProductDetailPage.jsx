@@ -1,11 +1,92 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
-import { productCatalog } from '../../data/productCatalog';
+import axiosClient from '../../services/axiosClient';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
-  const product = productCatalog.find((item) => item.id === id);
+  const navigate = useNavigate();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [addingToCart, setAddingToCart] = useState(false);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await axiosClient.get(`/products/${id}`);
+        setProduct(res.data);
+      } catch (err) {
+        console.error("Lỗi khi lấy sản phẩm:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
+
+  const handleBuyNow = () => {
+    if (!product) return;
+    
+    navigate("/checkout", {
+      state: {
+        items: [
+          {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            qty: 1,
+            image: product.imageUrl,
+          }
+        ],
+        total: product.price,
+        saved: 0,
+        selectedCount: 1,
+      }
+    });
+  };
+
+  const handleAddToCart = async () => {
+    try {
+      // Lấy user info từ localStorage
+      const authCache = localStorage.getItem('pcshop_auth_cache');
+      if (!authCache) {
+        alert('Vui lòng đăng nhập trước khi thêm vào giỏ hàng');
+        return;
+      }
+
+      const user = JSON.parse(authCache);
+      const customerId = user.customerId;
+
+      setAddingToCart(true);
+
+      // Gọi API thêm vào giỏ hàng
+      const res = await axiosClient.post('/cart/add', {
+        customerId,
+        productId: parseInt(id),
+      });
+
+      console.log("Add to cart response:", res.data);
+      alert('Đã thêm sản phẩm vào giỏ hàng!');
+    } catch (err) {
+      console.error("Lỗi khi thêm vào giỏ hàng:", err);
+      alert('Có lỗi khi thêm vào giỏ hàng: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setAddingToCart(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div>
+        <Header />
+        <div style={{ maxWidth: 1100, margin: '32px auto', padding: '24px', textAlign: 'center' }}>
+          <h2>Đang tải...</h2>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -29,22 +110,22 @@ export default function ProductDetailPage() {
           <div style={{ flex: '1 1 500px', minWidth: 320 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div style={{ gridColumn: '1 / span 2', border: '1px solid #ddd', borderRadius: 10, overflow: 'hidden', background: '#f9f9f9' }}>
-                <img src={product.image} alt={product.name} style={{ width: '100%', height: 360, objectFit: 'cover' }} />
+                <img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: 360, objectFit: 'cover' }} />
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <div style={{ width: 80, height: 80, border: '1px solid #ddd', borderRadius: 6, overflow: 'hidden' }}><img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                <div style={{ width: 80, height: 80, border: '1px solid #ddd', borderRadius: 6, overflow: 'hidden' }}><img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                <div style={{ width: 80, height: 80, border: '1px solid #ddd', borderRadius: 6, overflow: 'hidden' }}><img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                <div style={{ width: 80, height: 80, border: '1px solid #ddd', borderRadius: 6, overflow: 'hidden' }}><img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+                <div style={{ width: 80, height: 80, border: '1px solid #ddd', borderRadius: 6, overflow: 'hidden' }}><img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+                <div style={{ width: 80, height: 80, border: '1px solid #ddd', borderRadius: 6, overflow: 'hidden' }}><img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+                <div style={{ width: 80, height: 80, border: '1px solid #ddd', borderRadius: 6, overflow: 'hidden' }}><img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+                <div style={{ width: 80, height: 80, border: '1px solid #ddd', borderRadius: 6, overflow: 'hidden' }}><img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
               </div>
             </div>
           </div>
 
           <div style={{ flex: '1 1 360px', minWidth: 300, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ fontSize: 12, color: '#666' }}><Link to="/" style={{ color: '#000', textDecoration: 'none', fontWeight: 600 }}>Trang chủ</Link> &gt; Laptop &gt; <span style={{ color: '#999' }}>{product.name}</span></div>
+            <div style={{ fontSize: 12, color: '#666' }}><Link to="/" style={{ color: '#000', textDecoration: 'none', fontWeight: 600 }}>Trang chủ</Link> &gt; {product.category} &gt; <span style={{ color: '#999' }}>{product.name}</span></div>
             <h1 style={{ margin: '0 0 8px', fontSize: '1.8rem', lineHeight: 1.2 }}>{product.name}</h1>
-            <div style={{ marginBottom: 4, color: '#999', fontSize: 14 }}>📦 Tình trạng: Còn hàng</div>
-            <div style={{ fontSize: '2rem', color: '#d70018', fontWeight: 800 }}>{product.price} đ</div>
+            <div style={{ marginBottom: 4, color: '#999', fontSize: 14 }}>📦 Tình trạng: {product.stockQuantity > 0 ? 'Còn hàng' : 'Hết hàng'}</div>
+            <div style={{ fontSize: '2rem', color: '#d70018', fontWeight: 800 }}>{product.price.toLocaleString()} đ</div>
 
             <div style={{ marginTop: 12 }}>
               <div style={{ fontWeight: 700, marginBottom: 6 }}>Chọn phiên bản:</div>
@@ -64,20 +145,32 @@ export default function ProductDetailPage() {
             </div>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
-              <button style={{ flex: 1, borderRadius: 7, border: '1px solid #000', background: '#fff', padding: '12px', fontWeight: 700, cursor: 'pointer' }}>MUA NGAY</button>
-              <button style={{ flex: 1, borderRadius: 7, border: '1px solid #d70018', background: '#d70018', color: '#fff', padding: '12px', fontWeight: 700, cursor: 'pointer' }}>THÊM VÀO GIỎ</button>
+              <button 
+                onClick={handleBuyNow}
+                style={{ flex: 1, borderRadius: 7, border: '1px solid #000', background: '#fff', padding: '12px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                MUA NGAY
+              </button>
+              <button 
+                onClick={handleAddToCart}
+                disabled={addingToCart}
+                style={{ flex: 1, borderRadius: 7, border: '1px solid #d70018', background: '#d70018', color: '#fff', padding: '12px', fontWeight: 700, cursor: addingToCart ? 'not-allowed' : 'pointer', opacity: addingToCart ? 0.7 : 1 }}
+              >
+                {addingToCart ? 'Đang thêm...' : 'THÊM VÀO GIỎ'}
+              </button>
             </div>
 
             <div style={{ marginTop: 16 }}>
-              <h3 style={{ margin: '0 0 8px' }}>Bảng thông số kỹ thuật</h3>
+              <h3 style={{ margin: '0 0 8px' }}>Thông tin sản phẩm</h3>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                 <tbody>
-                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '8px 4px', fontWeight: 700, width: 130 }}>Brand</td><td style={{ padding: '8px 4px' }}>CellphoneS</td></tr>
-                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '8px 4px', fontWeight: 700 }}>CPU</td><td style={{ padding: '8px 4px' }}>Intel Core i5</td></tr>
-                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '8px 4px', fontWeight: 700 }}>RAM</td><td style={{ padding: '8px 4px' }}>8 GB</td></tr>
-                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '8px 4px', fontWeight: 700 }}>SSD</td><td style={{ padding: '8px 4px' }}>512 GB</td></tr>
-                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '8px 4px', fontWeight: 700 }}>Màn hình</td><td style={{ padding: '8px 4px' }}>15.6" Full HD</td></tr>
-                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '8px 4px', fontWeight: 700 }}>Hệ điều hành</td><td style={{ padding: '8px 4px' }}>Windows 11</td></tr>
+                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '8px 4px', fontWeight: 700, width: 130 }}>Tên</td><td style={{ padding: '8px 4px' }}>{product.name}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '8px 4px', fontWeight: 700 }}>Thương hiệu</td><td style={{ padding: '8px 4px' }}>{product.brand}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '8px 4px', fontWeight: 700 }}>Danh mục</td><td style={{ padding: '8px 4px' }}>{product.category}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '8px 4px', fontWeight: 700 }}>Giá</td><td style={{ padding: '8px 4px' }}>{product.price.toLocaleString()} đ</td></tr>
+                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '8px 4px', fontWeight: 700 }}>Số lượng</td><td style={{ padding: '8px 4px' }}>{product.stockQuantity}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '8px 4px', fontWeight: 700 }}>Giảm giá</td><td style={{ padding: '8px 4px' }}>{product.discount}%</td></tr>
+                  <tr><td style={{ padding: '8px 4px', fontWeight: 700 }}>Mô tả</td><td style={{ padding: '8px 4px' }}>{product.description}</td></tr>
                 </tbody>
               </table>
             </div>
