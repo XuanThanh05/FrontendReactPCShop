@@ -5,6 +5,7 @@ import Footer from '../../components/layout/Footer';
 import LoginPopup from '../../components/layout/LoginPopup';
 import { productCatalog } from '../../data/productCatalog';
 import './Home.css';
+import axiosClient from '../../services/axiosClient'; 
 
 const categories = [
   { name: 'Laptop', icon: '💻' },
@@ -23,6 +24,20 @@ const categories = [
 export default function Home() {
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const res = await axiosClient.get('/products');
+      setProducts(res.data); // lưu tất cả sản phẩm từ backend
+    } catch (err) {
+      console.error("Lỗi khi lấy sản phẩm:", err);
+    }
+  };
+
+  fetchProducts();
+}, []);
 
   useEffect(() => {
     const onScroll = () => {
@@ -74,19 +89,21 @@ export default function Home() {
               <div className="hot-sale-head"><div><h3>🔥 HOT SALE CUỐI TUẦN</h3><p>Ưu đãi sốc, săn ngay</p></div><div className="timer">01 : 02 : 22 : 17</div></div>
               <div className="hot-tabs"><button>Điện thoại, Tablet</button><button>Phụ kiện, PC</button></div>
               <div className="product-grid">
-                {productCatalog.map((p) => (
+                {products.map((p) => (
                   <Link key={p.id} to={`/product/${p.id}`} className="product-card" style={{ textDecoration: 'none', color: 'inherit' }}>
                     <div className="product-img">
-                      <div className="badge-wrap">
-                        <span className="discount-badge">
-                          <img src="https://cdn2.cellphones.com.vn/x/media/wysiwyg/discount-badge-ui-2025.png" alt="Giảm" />
-                          <span className="badge-text">{p.discount}%</span>
-                        </span>
-                      </div>
-                      <img src={p.image} alt={p.name} />
+                      {p.discount > 0 && (
+                        <div className="badge-wrap">
+                          <span className="discount-badge">
+                            <img src="https://cdn2.cellphones.com.vn/x/media/wysiwyg/discount-badge-ui-2025.png" alt="Giảm" />
+                            <span className="badge-text">{p.discount}%</span>
+                          </span>
+                        </div>
+                      )}
+                      <img src={p.imageUrl} alt={p.name} />
                     </div>
                     <div className="product-name">{p.name}</div>
-                    <div className="product-price">{p.price} đ</div>
+                    <div className="product-price">{p.price.toLocaleString()} đ</div>
                   </Link>
                 ))}
               </div>

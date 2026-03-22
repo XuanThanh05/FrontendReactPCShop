@@ -1,10 +1,10 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
-import { productCatalog } from '../../data/productCatalog';
 import { useAuth } from '../../features/auth/useAuth';
 import './Header.css';
+import axiosClient from '../../services/axiosClient'; 
 
 export default function Header({ onLoginClick }) {
   const { currentUser, isAdmin, logout } = useAuth();
@@ -12,6 +12,20 @@ export default function Header({ onLoginClick }) {
   const [showSuggest, setShowSuggest] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const res = await axiosClient.get('/products'); // gọi API backend
+      setProducts(res.data);
+    } catch (err) {
+      console.error("Lỗi khi lấy sản phẩm:", err);
+    }
+  };
+
+  fetchProducts();
+}, []);
 
   useEffect(() => {
     const searchText = new URLSearchParams(location.search).get('q') || '';
@@ -19,9 +33,9 @@ export default function Header({ onLoginClick }) {
   }, [location.pathname, location.search]);
 
   const suggestions = useMemo(() => {
-    const top = productCatalog.map((item) => item.name);
-    return [...new Set(top)].slice(0, 8);
-  }, []);
+    // map chỉ lấy tên sản phẩm
+    return products.map(p => p.name).slice(0, 10); // giới hạn 100 gợi ý
+  }, [products]);
 
   const filtered = suggestions.filter(item =>
     item.toLowerCase().includes(keyword.toLowerCase())
