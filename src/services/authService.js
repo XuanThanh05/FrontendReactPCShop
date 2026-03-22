@@ -23,7 +23,7 @@ function mapAuthPayload(payload) {
     id: payload?.customerId || username,
     customerId: payload?.customerId || null,
     username,
-    fullName: username,
+    fullName: payload?.fullName || username,
     role,
     isActive: true,
   };
@@ -61,12 +61,13 @@ export async function loginWithApi({ username, password }) {
   }
 }
 
-export async function registerWithApi({ username, email, password, phone }) {
+export async function registerWithApi({ username, fullName, email, password, phone }) {
   try {
     const response = await axiosClient.post(
       "/auth/register",
       {
         username: username?.trim(),
+        fullName: fullName?.trim(),
         email: email?.trim(),
         password,
         phone: phone?.trim() || null,
