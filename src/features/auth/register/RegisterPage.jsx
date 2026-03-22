@@ -62,6 +62,7 @@ export default function RegisterPage() {
         username: form.username,
         password: form.password,
         email: form.email,
+        phone: form.phone,
       });
       navigate('/');
     } catch (error) {
@@ -108,7 +109,7 @@ export default function RegisterPage() {
                 onChange={(event) => updateField('username', event.target.value)}
               />
               <Input
-                label="Số điện thoại (Tạm thời chưa dùng)"
+                label="Số điện thoại"
                 placeholder="Nhập số điện thoại"
                 value={form.phone}
                 onChange={(event) => updateField('phone', event.target.value)}

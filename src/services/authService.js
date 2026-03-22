@@ -61,7 +61,7 @@ export async function loginWithApi({ username, password }) {
   }
 }
 
-export async function registerWithApi({ username, email, password }) {
+export async function registerWithApi({ username, email, password, phone }) {
   try {
     const response = await axiosClient.post(
       "/auth/register",
@@ -69,6 +69,7 @@ export async function registerWithApi({ username, email, password }) {
         username: username?.trim(),
         email: email?.trim(),
         password,
+        phone: phone?.trim() || null,
       },
       { withCredentials: false }
     );
