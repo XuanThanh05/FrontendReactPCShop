@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import cartService from '../../services/cartService';
 import axiosClient from '../../services/axiosClient';
 
 export default function ProductDetailPage() {
@@ -49,40 +50,39 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = async () => {
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    if (product.stockQuantity <= 0) {
+      setErrorMessage('Sản phẩm hiện đã hết hàng');
+      setTimeout(() => setErrorMessage(''), 3000);
+      return;
+    }
+
+    setAddingToCart(true);
     try {
-      setErrorMessage('');
-      setSuccessMessage('');
-      
-      // Lấy user info từ localStorage
-      const authCache = localStorage.getItem('pcshop_auth_cache');
-      if (!authCache) {
-        setErrorMessage('Vui lòng đăng nhập trước khi thêm vào giỏ hàng');
+      // Kiểm tra số lượng đã có trong giỏ trước khi thêm
+      const cartRes = await cartService.getCart();
+      const cartItems = cartRes.data?.items?.content ?? [];
+      const existing = cartItems.find((i) => i.productId === product.id);
+      const currentQty = existing ? existing.quantity : 0;
+
+      if (currentQty >= product.stockQuantity) {
+        setErrorMessage(`Số lượng trong giỏ đã đạt tối đa tồn kho (${product.stockQuantity})`);
         setTimeout(() => setErrorMessage(''), 3000);
         return;
       }
 
-      const user = JSON.parse(authCache);
-      const customerId = user.customerId;
-
-      setAddingToCart(true);
-
-      // Gọi API thêm vào giỏ hàng
-      const res = await axiosClient.post('/cart/add', {
-        customerId,
-        productId: parseInt(id),
-      });
-
-      console.log("Add to cart response:", res.data);
+      await cartService.addToCart(parseInt(id), 1);
       setSuccessMessage('Đã thêm sản phẩm vào giỏ hàng');
-      
-      // Ẩn message sau 3 giây
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       console.error("Lỗi khi thêm vào giỏ hàng:", err);
-      const errorMsg = 'Có lỗi khi thêm vào giỏ hàng: ' + (err.response?.data?.message || err.message);
-      setErrorMessage(errorMsg);
-      
-      // Ẩn message sau 3 giây
+      if (err.response?.status === 401) {
+        setErrorMessage('Vui lòng đăng nhập trước khi thêm vào giỏ hàng');
+      } else {
+        setErrorMessage('Có lỗi khi thêm vào giỏ hàng: ' + (err.response?.data?.message || err.message));
+      }
       setTimeout(() => setErrorMessage(''), 3000);
     } finally {
       setAddingToCart(false);
@@ -120,13 +120,13 @@ export default function ProductDetailPage() {
       <Header />
       
       {successMessage && (
-        <div className="success-message" style={{ maxWidth: 1100, margin: '0 auto', padding: '12px 16px', background: '#d4edda', border: '1px solid #c3e6cb', borderRadius: 6, color: '#155724', position: 'sticky', top: 0, zIndex: 100 }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '12px 16px', background: '#d4edda', border: '1px solid #c3e6cb', borderRadius: 6, color: '#155724', position: 'sticky', top: 0, zIndex: 100 }}>
           {successMessage}
         </div>
       )}
-      
+
       {errorMessage && (
-        <div className="error-message" style={{ maxWidth: 1100, margin: '0 auto', padding: '12px 16px', background: '#f8d7da', border: '1px solid #f5c6cb', borderRadius: 6, color: '#721c24', position: 'sticky', top: 0, zIndex: 100 }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '12px 16px', background: '#fde8e8', border: '1px solid #E30019', borderRadius: 6, color: '#E30019', position: 'sticky', top: 0, zIndex: 100 }}>
           {errorMessage}
         </div>
       )}
