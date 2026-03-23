@@ -234,7 +234,7 @@ export default function ProductDetailPage() {
               <div style={{ fontWeight: 700 }}>Trần Quốc Minh</div>
               <div style={{ color: '#f5a623' }}>★★★★★</div>
               <p style={{ margin: '4px 0' }}>Hiệu năng siêu mạnh mẽ, pin trâu, camera chụp đẹp.</p>
-              <div style={{ color: '#999', fontSize: 12 }}>Đã mua tại CellphoneS · 1 tuần trước</div>
+              <div style={{ color: '#999', fontSize: 12 }}>Đã mua tại PCShop · 1 tuần trước</div>
             </div>
             <div style={{ marginBottom: 10, borderTop: '1px solid #eee', paddingTop: 10 }}>
               <div style={{ fontWeight: 700 }}>An Le</div>
@@ -250,7 +250,7 @@ export default function ProductDetailPage() {
             <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#f00', color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 700 }}>S</div>
             <div>
               <div style={{ fontWeight: 700 }}>Hỏi và đáp</div>
-              <div style={{ color: '#666', fontSize: 14 }}>Hãy đặt câu hỏi, CellphoneS trả lời trong 1 giờ.</div>
+              <div style={{ color: '#666', fontSize: 14 }}>Hãy đặt câu hỏi, PCShop trả lời trong 1 giờ.</div>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>

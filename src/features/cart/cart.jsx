@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
+import Header from "../../components/layout/Header";
+import Footer from "../../components/layout/Footer";
 import axiosClient from "../../services/axiosClient";
 import "./Cart.css";
 
@@ -31,11 +33,7 @@ const ChevronRight = () => (
     <polyline points="9 18 15 12 9 6"/>
   </svg>
 );
-const SearchIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" style={{ marginRight: 8, flexShrink: 0 }}>
-    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-  </svg>
-);
+
 const SimIcon = () => (
   <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
     <rect x="4" y="4" width="32" height="32" rx="6" fill="#E30019"/>
@@ -251,35 +249,12 @@ export default function Cart() {
   };
 
   return (
-    <div className="cart-page">
-      <header className="cart-header">
-        <div className="cart-header__inner">
-          <span className="cart-header__logo">cellphoneS</span>
-          <div className="cart-header__search">
-            <SearchIcon />
-            <input placeholder="Bạn muốn mua gì hôm nay?" />
-          </div>
-          <div className="cart-header__actions">
-            <button className="cart-header__btn">🛒 Giỏ hàng</button>
-            {isAdmin ? (
-              <button className="cart-header__btn" onClick={() => navigate("/admin/users")}>
-                🛠 Quản lý user
-              </button>
-            ) : null}
-            {currentUser ? (
-              <>
-                <span className="cart-header__user">👋 {currentUser.fullName}</span>
-                <button className="cart-header__btn" onClick={logout}>Đăng xuất</button>
-              </>
-            ) : (
-              <button className="cart-header__btn" onClick={() => navigate("/login")}>👤 Đăng nhập</button>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <div className="cart-body">
-        <div className="cart-title-row">
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Header />
+      
+      <div className="cart-page" style={{ flex: 1 }}>
+        <div className="cart-body">
+          <div className="cart-title-row">
           <button className="cart-back-btn" onClick={() => navigate("/")}>
             <ArrowLeftIcon /></button>
           <h1 className="cart-page-title">Giỏ hàng của bạn</h1>
@@ -386,6 +361,9 @@ export default function Cart() {
           <button className="cart-sticky-btn" onClick={goToCheckout}>Mua ngay ({selectedCount})</button>
         </div>
       )}
+      </div>
+      
+      <Footer />
     </div>
   );
 }

@@ -15,7 +15,7 @@ describe('Login Tests', () => {
   });
 
   it('Should display login form', () => {
-    cy.contains('Đăng nhập SMEMBER').should('be.visible');
+    cy.contains('Đăng nhập PCMEMBER').should('be.visible');
     cy.get(usernameInput).should('be.visible');
     cy.get(passwordInput).should('be.visible');
     cy.get('button').contains('Đăng nhập').should('be.visible');

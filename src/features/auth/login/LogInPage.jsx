@@ -23,8 +23,8 @@ export default function LogInPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const benefits = [
-    'Chiết khấu đến 5% khi mua sản phẩm tại CellphoneS',
-    'Miễn phí giao hàng cho thành viên Smember',
+    'Chiết khấu đến 5% khi mua sản phẩm tại PCShop',
+    'Miễn phí giao hàng cho thành viên PCmember',
     'Tặng voucher sinh nhật đến 500.000đ',
     'Trợ giá thu cũ lên đến 1 triệu',
     'Đặc quyền ưu đãi thêm đến 10% cho học sinh, sinh viên',
@@ -85,13 +85,13 @@ export default function LogInPage() {
       <div className="auth-shell login-shell">
         <section className="login-showcase auth-enter-left">
           <div className="login-brand-row">
-            <span>cellphoneS</span>
+            <span>PCShop</span>
             <span>dienthoaivui</span>
           </div>
           <h2>
-            Nhập hội khách hàng thân thiết <strong>SMEMBER</strong>
+            Nhập hội khách hàng thân thiết <strong>PCMEMBER</strong>
           </h2>
-          <p>Để không bỏ lỡ các ưu đãi hấp dẫn từ CellphoneS</p>
+          <p>Để không bỏ lỡ các ưu đãi hấp dẫn từ PCShop</p>
 
           <div className="login-benefits-card">
             <ul>
@@ -99,7 +99,7 @@ export default function LogInPage() {
                 <li key={item}>{item}</li>
               ))}
             </ul>
-            <a href="/">Xem chi tiết chính sách ưu đãi Smember</a>
+            <a href="/">Xem chi tiết chính sách ưu đãi PCmember</a>
           </div>
 
           <div className="login-showcase-mascot" aria-hidden="true">
@@ -109,7 +109,7 @@ export default function LogInPage() {
 
         <section className="auth-card login-form-card auth-enter-right">
 
-          <h1 className="auth-title">Đăng nhập SMEMBER</h1>
+          <h1 className="auth-title">Đăng nhập PCMEMBER</h1>
           <div className="login-account-hint">
             <span>Đăng nhập bằng tài khoản đã đăng ký trên backend.</span>
           </div>
@@ -150,7 +150,7 @@ export default function LogInPage() {
             Bạn chưa có tài khoản? <Link to="/register" className="auth-link-strong">Đăng ký ngay</Link>
           </div>
           <div className="auth-text-center" style={{ marginTop: 8, fontSize: 14, color: '#334155' }}>
-            Mua sắm tại <Link to="/" className="auth-link-strong">cellphones.com.vn</Link> và{' '}
+            Mua sắm tại <Link to="/" className="auth-link-strong">PCShop.com.vn</Link> và{' '}
             <Link to="/" className="auth-link-strong">dienthoaivui.com.vn</Link>
           </div>
         </section>

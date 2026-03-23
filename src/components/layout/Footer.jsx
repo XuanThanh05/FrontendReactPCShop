@@ -32,7 +32,7 @@ export default function Footer() {
             </ul>
           </div>
           <div className="footer-col">
-            <h4>Kết nối với CellphoneS</h4>
+            <h4>Kết nối với PCShop</h4>
             <div className="social-icons">Youtube Facebook Instagram TikTok Zalo</div>
             <h4>Website thành viên</h4>
             <div className="member-links">dienthoaivui • careS • Sforum</div>

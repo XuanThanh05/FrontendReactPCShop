@@ -52,7 +52,7 @@ export default function Header({ onLoginClick }) {
       <div className="pc-header-inner">
         <div className="pc-header-brand-wrap">
           <Link to="/" className="pc-header-brand">
-            cellphone<strong>S</strong>
+            <strong>PCShop</strong>
           </Link>
         </div>
         <div style={{ position: 'relative', flex: 1, minWidth: 220, margin: '0 8px', maxWidth: 500 }}>

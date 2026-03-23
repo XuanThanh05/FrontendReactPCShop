@@ -94,7 +94,7 @@ export default function RegisterPage() {
   return (
     <div className="auth-page auth-page-register">
       <div className="auth-shell register-shell auth-enter-up">
-        <h1 className="auth-title">Đăng ký trở thành SMEMBER</h1>
+        <h1 className="auth-title">Đăng ký trở thành PCMEMBER</h1>
         <div className="auth-text-center" style={{ marginTop: 8 }}>
           <div className="register-avatar" aria-hidden="true">SM</div>
           {/* <div className="auth-subtitle" style={{ marginTop: 12 }}>
@@ -165,12 +165,12 @@ export default function RegisterPage() {
 
             <label className="auth-check-line">
               <input type="checkbox" />
-              <span>Đăng ký nhận tin khuyến mãi từ CellphoneS</span>
+              <span>Đăng ký nhận tin khuyến mãi từ PCShop</span>
             </label>
 
             <p className="auth-policy-note">
               Bằng việc Đăng ký, bạn đã đọc và đồng ý với <a href="/">Điều khoản sử dụng</a> và{' '}
-              <a href="/">Chính sách bảo mật của CellphoneS</a>.
+              <a href="/">Chính sách bảo mật của PCShop</a>.
             </p>
           </div>
 
