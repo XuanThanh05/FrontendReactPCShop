@@ -1,48 +1,75 @@
 describe('Login Tests', () => {
-  const baseUrl = 'http://localhost:5173';
+  const usernameInput = 'input[placeholder="Nhập username của bạn"]';
+  const passwordInput = 'input[placeholder="Nhập mật khẩu của bạn"]';
 
   beforeEach(() => {
-    cy.visit(`${baseUrl}/login`);
+    cy.clearCookies();
+    cy.clearLocalStorage();
+    cy.intercept('GET', '**/auth/me', {
+      statusCode: 401,
+      body: { message: 'Unauthorized' },
+    }).as('getCurrentSession');
+
+    cy.visit('/login');
+    cy.wait('@getCurrentSession');
   });
 
   it('Should display login form', () => {
-    cy.contains('Đăng nhập').should('be.visible');
-    cy.get('input[placeholder="Nhập email hoặc username"]').should('be.visible');
-    cy.get('input[placeholder="Nhập mật khẩu"]').should('be.visible');
+    cy.contains('Đăng nhập SMEMBER').should('be.visible');
+    cy.get(usernameInput).should('be.visible');
+    cy.get(passwordInput).should('be.visible');
     cy.get('button').contains('Đăng nhập').should('be.visible');
   });
 
   it('Should show error when fields are empty', () => {
     cy.get('button').contains('Đăng nhập').click();
-    cy.contains('Vui lòng nhập').should('be.visible');
-  });
-
-  it('Should show error with invalid email', () => {
-    cy.get('input[placeholder="Nhập email hoặc username"]').type('invalidemail');
-    cy.get('input[placeholder="Nhập mật khẩu"]').type('anypassword');
-    cy.get('button').contains('Đăng nhập').click();
-    cy.contains('không hợp lệ', { timeout: 5000 }).should('be.visible');
+    cy.contains('Vui lòng nhập đầy đủ username và mật khẩu.').should('be.visible');
   });
 
   it('Should show error with wrong credentials', () => {
-    cy.get('input[placeholder="Nhập email hoặc username"]').type('wrong@example.com');
-    cy.get('input[placeholder="Nhập mật khẩu"]').type('wrongpassword');
+    cy.intercept('POST', '**/auth/login', {
+      statusCode: 401,
+      body: { message: 'Sai thông tin đăng nhập.' },
+    }).as('loginFailed');
+
+    cy.get(usernameInput).type('wrong_user');
+    cy.get(passwordInput).type('wrongpassword');
     cy.get('button').contains('Đăng nhập').click();
-    cy.contains('sai', { timeout: 5000 }).should('be.visible');
+    cy.wait('@loginFailed');
+    cy.contains('Sai thông tin đăng nhập.').should('be.visible');
   });
 
   it('Should successfully login with valid credentials', () => {
-    cy.get('input[placeholder="Nhập email hoặc username"]').type('thanh@cellphones.com');
-    cy.get('input[placeholder="Nhập mật khẩu"]').type('password123');
+    cy.intercept('POST', '**/auth/login', {
+      statusCode: 200,
+      body: {
+        customerId: 11,
+        username: 'user1',
+        fullName: 'User One',
+        role: 'CUSTOMER',
+      },
+    }).as('loginSuccess');
+
+    cy.get(usernameInput).type('user1');
+    cy.get(passwordInput).type('user123');
     cy.get('button').contains('Đăng nhập').click();
-    
-    // Chờ redirect tới home page
-    cy.url({ timeout: 5000 }).should('include', '/');
-    cy.contains('Xin chào').should('be.visible');
+    cy.wait('@loginSuccess');
+
+    cy.url({ timeout: 10000 }).should('eq', `${Cypress.config('baseUrl')}/`);
+    cy.contains('Xin chào, User One', { timeout: 10000 }).should('be.visible');
+
+    cy.window().then((win) => {
+      const authCache = win.localStorage.getItem('pcshop_auth_cache');
+      expect(authCache).to.not.be.null;
+
+      const parsed = JSON.parse(authCache);
+      expect(parsed.username).to.eq('user1');
+      expect(parsed.fullName).to.eq('User One');
+    });
   });
 
   it('Should show "Register" link', () => {
-    cy.contains('Chưa có tài khoản?').should('be.visible');
+    cy.contains('Bạn chưa có tài khoản?').should('be.visible');
     cy.contains('Đăng ký ngay').should('be.visible').should('have.attr', 'href', '/register');
   });
 
