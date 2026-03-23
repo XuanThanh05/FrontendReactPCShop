@@ -462,6 +462,23 @@
   color: #ef4444;
 }
 
+/* ---- Sortable Table Headers ---- */
+.warehouse-table thead th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  padding: 10px 12px;
+}
+
+.warehouse-table thead th.sortable:hover {
+  background-color: #e2e8f0;
+}
+
+.warehouse-table thead th.sortable.sorted {
+  background-color: #dbeafe;
+  color: #0369a1;
+}
+
 .status-badge {
   display: inline-block;
   border-radius: 999px;

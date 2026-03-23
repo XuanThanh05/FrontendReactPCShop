@@ -21,9 +21,8 @@ const formatVND = (val) =>
   new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(val);
 
 const formatMillions = (val) => {
-  if (val >= 1_000_000_000) return `${(val / 1_000_000_000).toFixed(1)} tỷ`;
-  if (val >= 1_000_000)     return `${(val / 1_000_000).toFixed(0)} tr`;
-  return val.toString();
+  if (!val) return "0 ₫";
+  return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(val);
 };
 
 // ---- Component chính ----
@@ -33,6 +32,8 @@ export default function StatisticsPage() {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sortColumn, setSortColumn] = useState("name"); // "name", "category", "stockQuantity"
+  const [sortDirection, setSortDirection] = useState("asc"); // "asc" hoặc "desc"
 
   useEffect(() => {
     const fetchStatistics = async () => {
@@ -70,6 +71,51 @@ export default function StatisticsPage() {
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  // Hàm xử lý sắp xếp bảng kho hàng
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      // Nếu bấm cùng cột, đảo hướng sắp xếp
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      // Nếu bấm cột khác, set cột mới và hướng mặc định là asc
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  // Sắp xếp dữ liệu kho hàng
+  const getSortedWarehouseData = () => {
+    if (!stats.warehouseReport) return [];
+    
+    const sorted = [...stats.warehouseReport].sort((a, b) => {
+      let compareA, compareB;
+      
+      switch (sortColumn) {
+        case "name":
+          compareA = a.name.toLowerCase();
+          compareB = b.name.toLowerCase();
+          break;
+        case "category":
+          compareA = a.category.toLowerCase();
+          compareB = b.category.toLowerCase();
+          break;
+        case "stockQuantity":
+          compareA = a.stockQuantity;
+          compareB = b.stockQuantity;
+          break;
+        default:
+          compareA = a.name;
+          compareB = b.name;
+      }
+      
+      if (compareA < compareB) return sortDirection === "asc" ? -1 : 1;
+      if (compareA > compareB) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+    
+    return sorted;
   };
 
   if (loading) {
@@ -120,6 +166,11 @@ export default function StatisticsPage() {
     ? Math.max(...stats.topProducts.map(p => p.quantity))
     : 1;
 
+  // Tính số lượng hàng tồn kho thấp (< 10 và > 0)
+  const lowStockProducts = stats.warehouseReport?.filter(
+    item => item.stockQuantity > 0 && item.stockQuantity < 10
+  ).length || 0;
+
   return (
     <div className="stats-page">
       <div className="stats-topbar">
@@ -158,6 +209,12 @@ export default function StatisticsPage() {
           <div className="card-icon">👥</div>
           <div className="card-label">Khách Hàng</div>
           <div className="card-value">{stats.totalCustomers}</div>
+        </div>
+
+        <div className="summary-card yellow">
+          <div className="card-icon">⚠️</div>
+          <div className="card-label">Hàng Tồn Kho Thấp</div>
+          <div className="card-value">{lowStockProducts}</div>
         </div>
       </div>
 
@@ -251,19 +308,38 @@ export default function StatisticsPage() {
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Tên Sản Phẩm</th>
-                  <th>Danh Mục</th>
-                  <th>Tồn Kho</th>
+                  <th 
+                    className={`sortable ${sortColumn === "name" ? "sorted" : ""}`}
+                    onClick={() => handleSort("name")}
+                  >
+                    Tên Sản Phẩm {sortColumn === "name" && (sortDirection === "asc" ? "↓" : "↑")}
+                  </th>
+                  <th 
+                    className={`sortable ${sortColumn === "category" ? "sorted" : ""}`}
+                    onClick={() => handleSort("category")}
+                  >
+                    Danh Mục {sortColumn === "category" && (sortDirection === "asc" ? "↓" : "↑")}
+                  </th>
+                  <th 
+                    className={`sortable ${sortColumn === "stockQuantity" ? "sorted" : ""}`}
+                    onClick={() => handleSort("stockQuantity")}
+                  >
+                    Tồn Kho {sortColumn === "stockQuantity" && (sortDirection === "asc" ? "↑" : "↓")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {stats.warehouseReport.map((item, idx) => (
+                {getSortedWarehouseData().map((item, idx) => (
                   <tr key={item.id}>
                     <td className="col-id">{String(idx + 1).padStart(2, "0")}</td>
                     <td className="col-name">{item.name}</td>
                     <td className="col-category"><span className="category-badge">{item.category}</span></td>
                     <td className="col-stock">
-                      <span className={`stock-num ${item.stockQuantity > 0 ? "ok" : "danger"}`}>
+                      <span className={`stock-num ${
+                        item.stockQuantity === 0 ? "danger" : 
+                        item.stockQuantity < 10 ? "warn" : 
+                        "ok"
+                      }`}>
                         {item.stockQuantity}
                       </span>
                     </td>
