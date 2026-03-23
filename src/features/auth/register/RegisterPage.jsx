@@ -46,6 +46,13 @@ export default function RegisterPage() {
       return;
     }
 
+    // Kiểm tra email hợp lệ
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      setErrorMessage('Email không hợp lệ.');
+      return;
+    }
+
     if (form.password.length < 8) {
       setErrorMessage('Mật khẩu phải có ít nhất 8 ký tự.');
       return;
@@ -67,7 +74,18 @@ export default function RegisterPage() {
       });
       navigate('/');
     } catch (error) {
-      setErrorMessage(error?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+      let message = error?.message || 'Đăng ký thất bại. Vui lòng thử lại.';
+      
+      // Map server error messages to user-friendly messages
+      if (message.includes('unauthorized') || message.includes('Unauthorized')) {
+        message = 'Email hoặc username đã tồn tại.';
+      } else if (message.includes('email') || message.includes('Email')) {
+        message = 'Email đã được sử dụng. Vui lòng dùng email khác.';
+      } else if (message.includes('username') || message.includes('Username')) {
+        message = 'Username đã tồn tại. Vui lòng chọn username khác.';
+      }
+      
+      setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -118,7 +136,6 @@ export default function RegisterPage() {
               <Input
                 label="Email"
                 placeholder="Nhập email"
-                type="email"
                 value={form.email}
                 onChange={(event) => updateField('email', event.target.value)}
               />
