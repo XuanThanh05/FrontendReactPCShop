@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import cartService from '../../services/cartService';
 import axiosClient from '../../services/axiosClient';
 
 export default function ProductDetailPage() {
@@ -49,40 +50,21 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = async () => {
+    setErrorMessage('');
+    setSuccessMessage('');
+    setAddingToCart(true);
     try {
-      setErrorMessage('');
-      setSuccessMessage('');
-      
-      // Lấy user info từ localStorage
-      const authCache = localStorage.getItem('pcshop_auth_cache');
-      if (!authCache) {
-        setErrorMessage('Vui lòng đăng nhập trước khi thêm vào giỏ hàng');
-        setTimeout(() => setErrorMessage(''), 3000);
-        return;
-      }
-
-      const user = JSON.parse(authCache);
-      const customerId = user.customerId;
-
-      setAddingToCart(true);
-
-      // Gọi API thêm vào giỏ hàng
-      const res = await axiosClient.post('/cart/add', {
-        customerId,
-        productId: parseInt(id),
-      });
-
-      console.log("Add to cart response:", res.data);
+      await cartService.addToCart(parseInt(id), 1);
       setSuccessMessage('Đã thêm sản phẩm vào giỏ hàng');
-      
-      // Ẩn message sau 3 giây
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       console.error("Lỗi khi thêm vào giỏ hàng:", err);
-      const errorMsg = 'Có lỗi khi thêm vào giỏ hàng: ' + (err.response?.data?.message || err.message);
-      setErrorMessage(errorMsg);
-      
-      // Ẩn message sau 3 giây
+      // 401 → chưa đăng nhập
+      if (err.response?.status === 401) {
+        setErrorMessage('Vui lòng đăng nhập trước khi thêm vào giỏ hàng');
+      } else {
+        setErrorMessage('Có lỗi khi thêm vào giỏ hàng: ' + (err.response?.data?.message || err.message));
+      }
       setTimeout(() => setErrorMessage(''), 3000);
     } finally {
       setAddingToCart(false);
