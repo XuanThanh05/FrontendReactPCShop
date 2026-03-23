@@ -10,6 +10,8 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -48,10 +50,14 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = async () => {
     try {
+      setErrorMessage('');
+      setSuccessMessage('');
+      
       // Lấy user info từ localStorage
       const authCache = localStorage.getItem('pcshop_auth_cache');
       if (!authCache) {
-        alert('Vui lòng đăng nhập trước khi thêm vào giỏ hàng');
+        setErrorMessage('Vui lòng đăng nhập trước khi thêm vào giỏ hàng');
+        setTimeout(() => setErrorMessage(''), 3000);
         return;
       }
 
@@ -67,10 +73,17 @@ export default function ProductDetailPage() {
       });
 
       console.log("Add to cart response:", res.data);
-      alert('Đã thêm sản phẩm vào giỏ hàng!');
+      setSuccessMessage('Đã thêm sản phẩm vào giỏ hàng');
+      
+      // Ẩn message sau 3 giây
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       console.error("Lỗi khi thêm vào giỏ hàng:", err);
-      alert('Có lỗi khi thêm vào giỏ hàng: ' + (err.response?.data?.message || err.message));
+      const errorMsg = 'Có lỗi khi thêm vào giỏ hàng: ' + (err.response?.data?.message || err.message);
+      setErrorMessage(errorMsg);
+      
+      // Ẩn message sau 3 giây
+      setTimeout(() => setErrorMessage(''), 3000);
     } finally {
       setAddingToCart(false);
     }
@@ -105,6 +118,19 @@ export default function ProductDetailPage() {
   return (
     <div>
       <Header />
+      
+      {successMessage && (
+        <div className="success-message" style={{ maxWidth: 1100, margin: '0 auto', padding: '12px 16px', background: '#d4edda', border: '1px solid #c3e6cb', borderRadius: 6, color: '#155724', position: 'sticky', top: 0, zIndex: 100 }}>
+          {successMessage}
+        </div>
+      )}
+      
+      {errorMessage && (
+        <div className="error-message" style={{ maxWidth: 1100, margin: '0 auto', padding: '12px 16px', background: '#f8d7da', border: '1px solid #f5c6cb', borderRadius: 6, color: '#721c24', position: 'sticky', top: 0, zIndex: 100 }}>
+          {errorMessage}
+        </div>
+      )}
+      
       <main style={{ maxWidth: 1100, margin: '30px auto', padding: '16px' }}>
         <section style={{ display: 'flex', flexWrap: 'wrap', gap: 20, background: '#fff', borderRadius: 10, border: '1px solid #e8e8e8', padding: 16 }}>
           <div style={{ flex: '1 1 500px', minWidth: 320 }}>
