@@ -50,7 +50,7 @@ const LensIcon = () => (
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const fmt = (n) => n.toLocaleString("vi-VN") + "đ";
-
+ 
 /**
  * Transform CartItemResponse từ BE sang shape dùng trong component.
  * BE trả về: { id, product: { id, name, price, discount, imageUrl }, quantity }
@@ -62,7 +62,7 @@ const transformItem = (item) => {
   const originalPrice = discountPct > 0
     ? Math.round(price / (1 - discountPct / 100))
     : price;
-
+ 
   return {
     cartItemId: item.cartItemId,          // id của CartItem (dùng cho update/remove)
     id: item.productId,                   // id sản phẩm (dùng làm key)
@@ -70,13 +70,14 @@ const transformItem = (item) => {
     price,
     originalPrice,
     qty: item.quantity,
+    stockQuantity: item.stockQuantity ?? 99,
     selected: false,
     image: item.productImageUrl,
     promo: null,
     addons: [],
   };
 };
-
+ 
 // ── Sub-components ────────────────────────────────────────────────────────────
 function QtyControl({ qty, onChange }) {
   return (
@@ -87,28 +88,8 @@ function QtyControl({ qty, onChange }) {
     </div>
   );
 }
-
-function AddonRow({ addon }) {
-  const [chosen, setChosen] = useState(false);
-  return (
-    <div className="cart-addon-row">
-      <div className="cart-addon-icon">
-        {addon.icon === "sim" ? <SimIcon /> : <LensIcon />}
-      </div>
-      <div className="cart-addon-info">
-        <div className="cart-addon-label">{addon.label}</div>
-        <span className="cart-addon-badge">{addon.badge}</span>
-      </div>
-      <button
-        className={`cart-addon-btn${chosen ? " chosen" : ""}`}
-        onClick={() => setChosen(!chosen)}
-      >
-        {chosen ? "Đã chọn" : "Chọn"}
-      </button>
-    </div>
-  );
-}
-
+ 
+ 
 function CartItemCard({ item, onSelect, onQtyChange, onRemove }) {
   return (
     <div className="cart-item">
@@ -173,15 +154,20 @@ function CartItemCard({ item, onSelect, onQtyChange, onRemove }) {
     </div>
   );
 }
-
+ 
 // ── Main Cart Component ───────────────────────────────────────────────────────
 export default function Cart() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectAll, setSelectAll] = useState(false);
-
+  const [toastMsg, setToastMsg] = useState('');
+ 
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(''), 3000);
+  };
+ 
   // ── Fetch cart ──────────────────────────────────────────────────────────────
   const fetchCart = useCallback(async () => {
     setLoading(true);
@@ -197,23 +183,32 @@ export default function Cart() {
       setLoading(false);
     }
   }, []);
-
+ 
   useEffect(() => { fetchCart(); }, [fetchCart]);
-
+ 
   // ── Select ──────────────────────────────────────────────────────────────────
   const toggleSelect = (cartItemId) =>
     setItems((prev) =>
       prev.map((i) => (i.cartItemId === cartItemId ? { ...i, selected: !i.selected } : i))
     );
-
+ 
   const toggleSelectAll = () => {
     const next = !selectAll;
     setSelectAll(next);
     setItems((prev) => prev.map((i) => ({ ...i, selected: next })));
   };
-
+ 
   // ── Qty (optimistic + sync to BE) ──────────────────────────────────────────
+  const [selectAll, setSelectAll] = useState(false);
+ 
   const changeQty = async (cartItemId, qty) => {
+    const item = items.find((i) => i.cartItemId === cartItemId);
+    if (!item) return;
+ 
+    if (qty > item.stockQuantity) {
+      showToast(`Số lượng tối đa là ${item.stockQuantity} (theo tồn kho)`);
+      return;
+    }
     // Optimistic update
     setItems((prev) =>
       prev.map((i) => (i.cartItemId === cartItemId ? { ...i, qty } : i))
@@ -226,7 +221,7 @@ export default function Cart() {
       fetchCart();
     }
   };
-
+ 
   // ── Remove single (optimistic) ──────────────────────────────────────────────
   const removeItem = async (cartItemId) => {
     setItems((prev) => prev.filter((i) => i.cartItemId !== cartItemId));
@@ -237,7 +232,7 @@ export default function Cart() {
       fetchCart();
     }
   };
-
+ 
   // ── Remove selected (gọi từng item vì BE không có bulk-delete) ─────────────
   const removeSelected = async () => {
     const toDelete = items.filter((i) => i.selected).map((i) => i.cartItemId);
@@ -250,23 +245,29 @@ export default function Cart() {
       fetchCart();
     }
   };
-
+ 
   // ── Derived ─────────────────────────────────────────────────────────────────
   const selectedItems  = items.filter((i) => i.selected);
   const total          = selectedItems.reduce((s, i) => s + i.price * i.qty, 0);
   const saved          = selectedItems.reduce((s, i) => s + (i.originalPrice - i.price) * i.qty, 0);
   const selectedCount  = selectedItems.reduce((s, i) => s + i.qty, 0);
-
+ 
   const goToCheckout = () => {
     if (selectedItems.length === 0) return;
     navigate("/checkout", { state: { items: selectedItems, total, saved, selectedCount } });
   };
-
+ 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Header />
-
+ 
+      {toastMsg && (
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '12px 16px', background: '#fde8e8', border: '1px solid #E30019', borderRadius: 6, color: '#E30019', position: 'sticky', top: 56, zIndex: 150 }}>
+          {toastMsg}
+        </div>
+      )}
+ 
       <div className="cart-page" style={{ flex: 1 }}>
         <div className="cart-body">
           <div className="cart-title-row">
@@ -275,7 +276,7 @@ export default function Cart() {
             </button>
             <h1 className="cart-page-title">Giỏ hàng của bạn</h1>
           </div>
-
+ 
           <div className="cart-layout">
             <div className="cart-left">
               <div className="cart-select-all-bar">
@@ -292,7 +293,7 @@ export default function Cart() {
                   Xóa sản phẩm đã chọn
                 </button>
               </div>
-
+ 
               {loading ? (
                 <div className="cart-empty">
                   <div className="cart-empty__text">Đang tải giỏ hàng...</div>
@@ -317,11 +318,11 @@ export default function Cart() {
                 ))
               )}
             </div>
-
+ 
             <div className="cart-right">
               <div className="cart-summary-card">
                 <h2 className="cart-summary-title">Đơn hàng của bạn</h2>
-
+ 
                 {selectedItems.length === 0 ? (
                   <p className="cart-summary-empty">Chưa có sản phẩm nào được chọn</p>
                 ) : (
@@ -338,7 +339,7 @@ export default function Cart() {
                     <div className="cart-summary-divider" />
                   </>
                 )}
-
+ 
                 <div className="cart-summary-row">
                   <span>Tạm tính</span>
                   <span className="cart-summary-row__total">{fmt(total)}</span>
@@ -349,7 +350,7 @@ export default function Cart() {
                     <span className="cart-summary-row__saved">{fmt(saved)}</span>
                   </div>
                 )}
-
+ 
                 <button
                   className="cart-buy-btn"
                   disabled={selectedCount === 0}
@@ -357,7 +358,7 @@ export default function Cart() {
                 >
                   Mua ngay{selectedCount > 0 ? ` (${selectedCount})` : ""}
                 </button>
-
+ 
                 <div className="cart-trust-row">
                   <div className="cart-trust-badge">🚚 Giao hàng toàn quốc</div>
                   <div className="cart-trust-badge">🔒 Thanh toán bảo mật</div>
@@ -367,7 +368,7 @@ export default function Cart() {
             </div>
           </div>
         </div>
-
+ 
         {selectedCount > 0 && (
           <div className="cart-sticky-bar">
             <div>
@@ -386,7 +387,7 @@ export default function Cart() {
           </div>
         )}
       </div>
-
+ 
       <Footer />
     </div>
   );
