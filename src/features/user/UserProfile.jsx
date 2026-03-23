@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { useAuth } from '../auth/useAuth';
+import UserOrderStatisticsDashboard from '../../components/UserOrderStatisticsDashboard';
 import './UserProfile.css';
 
 const mockOrders = [
@@ -32,6 +33,7 @@ const mockOrders = [
 export default function UserProfile() {
   const { currentUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('all');
+  const [currentMenu, setCurrentMenu] = useState('statistics'); // Chuyển default về Thống kê cho dễ test
 
   const user = currentUser || { fullName: 'Khách hàng, Nguyễn Văn A' };
 
@@ -49,19 +51,22 @@ export default function UserProfile() {
           </div>
 
           <nav className="profile-nav">
-            <a href="#orders" className="profile-nav-item active">
+            <a href="#statistics" className={`profile-nav-item ${currentMenu === 'statistics' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentMenu('statistics'); }}>
+              <span className="nav-icon">📊</span> Thống kê báo cáo
+            </a>
+            <a href="#orders" className={`profile-nav-item ${currentMenu === 'orders' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentMenu('orders'); }}>
               <span className="nav-icon">📦</span> Đơn hàng đã mua
             </a>
-            <a href="#vouchers" className="profile-nav-item">
+            <a href="#vouchers" className={`profile-nav-item ${currentMenu === 'vouchers' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentMenu('vouchers'); }}>
               <span className="nav-icon">🎟️</span> Mã giảm giá
             </a>
-            <a href="#membership" className="profile-nav-item">
+            <a href="#membership" className={`profile-nav-item ${currentMenu === 'membership' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentMenu('membership'); }}>
               <span className="nav-icon">👑</span> Hạng thành viên
             </a>
-            <a href="#personal-info" className="profile-nav-item">
+            <a href="#personal-info" className={`profile-nav-item ${currentMenu === 'personal-info' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentMenu('personal-info'); }}>
               <span className="nav-icon">👤</span> Thông tin cá nhân
             </a>
-            <a href="#password" className="profile-nav-item">
+            <a href="#password" className={`profile-nav-item ${currentMenu === 'password' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentMenu('password'); }}>
               <span className="nav-icon">🔒</span> Đổi mật khẩu
             </a>
           </nav>
@@ -72,76 +77,91 @@ export default function UserProfile() {
         </aside>
 
         <main className="profile-content">
-          <h2 className="content-title">Đơn hàng đã mua</h2>
+          {currentMenu === 'statistics' && (
+            <UserOrderStatisticsDashboard userId={1} />
+          )}
 
-          <div className="order-tabs">
-            <button
-              className={`order-tab-btn ${activeTab === 'all' ? 'active' : ''}`}
-              onClick={() => setActiveTab('all')}
-            >
-              Tất cả
-            </button>
-            <button
-              className={`order-tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
-              onClick={() => setActiveTab('pending')}
-            >
-              Chờ xử lý
-            </button>
-            <button
-              className={`order-tab-btn ${activeTab === 'confirmed' ? 'active' : ''}`}
-              onClick={() => setActiveTab('confirmed')}
-            >
-              Đã xác nhận
-            </button>
-            <button
-              className={`order-tab-btn ${activeTab === 'shipping' ? 'active' : ''}`}
-              onClick={() => setActiveTab('shipping')}
-            >
-              Đang chuyển hàng
-            </button>
-            <button
-              className={`order-tab-btn ${activeTab === 'delivered' ? 'active' : ''}`}
-              onClick={() => setActiveTab('delivered')}
-            >
-              Đang giao hàng
-            </button>
-            <button
-              className={`order-tab-btn ${activeTab === 'canceled' ? 'active' : ''}`}
-              onClick={() => setActiveTab('canceled')}
-            >
-              Đã hủy
-            </button>
-            <button
-              className={`order-tab-btn ${activeTab === 'success' ? 'active' : ''}`}
-              onClick={() => setActiveTab('success')}
-            >
-              Thành công
-            </button>
-          </div>
+          {currentMenu === 'orders' && (
+            <>
+              <h2 className="content-title">Đơn hàng đã mua</h2>
 
-          {/* Danh sách đơn hàng */}
-          <div className="order-list">
-            {mockOrders.map((order) => (
-              <div key={order.id} className={`order-card ${order.status === 'Chờ xử lý' ? 'highlight' : ''}`}>
-                <div className="order-status-right">
-                  Trạng thái: <span>{order.status}</span>
-                </div>
-
-                <div className="order-details">
-                  <div className="order-image">
-                    <img src={order.image} alt={order.productName} />
-                  </div>
-                  <div className="order-info-center">
-                    <h4 className="order-product-name">{order.productName}</h4>
-                  </div>
-                  <div className="order-price-right">
-                    <p className="order-price">{order.price}</p>
-                    <button className="view-detail-btn">Xem chi tiết</button>
-                  </div>
-                </div>
+              <div className="order-tabs">
+                <button
+                  className={`order-tab-btn ${activeTab === 'all' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('all')}
+                >
+                  Tất cả
+                </button>
+                <button
+                  className={`order-tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('pending')}
+                >
+                  Chờ xử lý
+                </button>
+                <button
+                  className={`order-tab-btn ${activeTab === 'confirmed' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('confirmed')}
+                >
+                  Đã xác nhận
+                </button>
+                <button
+                  className={`order-tab-btn ${activeTab === 'shipping' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('shipping')}
+                >
+                  Đang chuyển hàng
+                </button>
+                <button
+                  className={`order-tab-btn ${activeTab === 'delivered' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('delivered')}
+                >
+                  Đang giao hàng
+                </button>
+                <button
+                  className={`order-tab-btn ${activeTab === 'canceled' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('canceled')}
+                >
+                  Đã hủy
+                </button>
+                <button
+                  className={`order-tab-btn ${activeTab === 'success' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('success')}
+                >
+                  Thành công
+                </button>
               </div>
-            ))}
-          </div>
+
+              {/* Danh sách đơn hàng */}
+              <div className="order-list">
+                {mockOrders.map((order) => (
+                  <div key={order.id} className={`order-card ${order.status === 'Chờ xử lý' ? 'highlight' : ''}`}>
+                    <div className="order-status-right">
+                      Trạng thái: <span>{order.status}</span>
+                    </div>
+
+                    <div className="order-details">
+                      <div className="order-image">
+                        <img src={order.image} alt={order.productName} />
+                      </div>
+                      <div className="order-info-center">
+                        <h4 className="order-product-name">{order.productName}</h4>
+                      </div>
+                      <div className="order-price-right">
+                        <p className="order-price">{order.price}</p>
+                        <button className="view-detail-btn">Xem chi tiết</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {currentMenu !== 'statistics' && currentMenu !== 'orders' && (
+            <div style={{ padding: '40px', textAlign: 'center', color: '#7f8c8d' }}>
+              <h2>Tính năng đang phát triển</h2>
+              <p>Vui lòng chọn Thống kê mua sắm hoặc Đơn hàng đã mua.</p>
+            </div>
+          )}
         </main>
       </div>
 
