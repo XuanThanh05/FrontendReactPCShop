@@ -131,14 +131,6 @@ function CartItemCard({ item, onSelect, onQtyChange, onRemove }) {
         </div>
       )}
 
-      <div className="cart-warranty-row">
-        <ShieldIcon />
-        <span className="cart-warranty-text">Bảo vệ toàn diện với Bảo hành mở rộng</span>
-        <button className="cart-warranty-btn">
-          <span>chọn gói</span>
-          <ChevronRight />
-        </button>
-      </div>
 
       {item.addons.length > 0 && (
         <div className="cart-addon-section">
