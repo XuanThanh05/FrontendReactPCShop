@@ -1,5 +1,7 @@
 import axiosClient from "./axiosClient";
 
+const AUTH_CACHE_KEY = "pcshop_auth_cache";
+
 function extractRole(rawRole, authorities = []) {
   if (typeof rawRole === "string" && rawRole.trim()) {
     const normalized = rawRole.toUpperCase();
@@ -15,9 +17,22 @@ function extractRole(rawRole, authorities = []) {
   return "customer";
 }
 
-function mapAuthPayload(payload) {
+function readCachedAuth() {
+  try {
+    const raw = localStorage.getItem(AUTH_CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function mapAuthPayload(payload, fallbackAuth = null) {
   const username = payload?.username || "";
   const role = extractRole(payload?.role, payload?.authorities || []);
+  const accessToken =
+    payload?.accessToken || payload?.token || payload?.jwt || fallbackAuth?.accessToken || fallbackAuth?.token || fallbackAuth?.jwt || null;
+  const tokenType = payload?.tokenType || fallbackAuth?.tokenType || "Bearer";
 
   return {
     id: payload?.customerId || username,
@@ -26,6 +41,8 @@ function mapAuthPayload(payload) {
     fullName: payload?.fullName || username,
     role,
     isActive: true,
+    accessToken,
+    tokenType,
   };
 }
 
@@ -83,8 +100,9 @@ export async function registerWithApi({ username, fullName, email, password, pho
 
 export async function getCurrentUserFromApi() {
   try {
+    const cachedAuth = readCachedAuth();
     const response = await axiosClient.get("/auth/me", { withCredentials: true });
-    return mapAuthPayload(response.data);
+    return mapAuthPayload(response.data, cachedAuth);
   } catch (error) {
     if (error?.response?.status === 401 || error?.response?.status === 403) {
       return null;
