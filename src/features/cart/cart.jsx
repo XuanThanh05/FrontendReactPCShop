@@ -4,7 +4,7 @@ import { useAuth } from "../auth/useAuth";
 import Header from "../../components/layout/Header";
 import Footer from "../../components/layout/Footer";
 import cartService from "../../services/cartService";
-import "./Cart.css";
+import "./cart.css";
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 const TrashIcon = () => (
