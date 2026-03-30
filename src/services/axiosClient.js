@@ -2,11 +2,11 @@ import axios from "axios";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.PROD ? "/api" : "http://161.118.200.236/api");
+  (import.meta.env.PROD ? "/api" : "http://localhost:8080/api"); // Cấu hình baseURL linh hoạt cho dev và prod
 
 
 //http://161.118.200.236/api nếu muốn chạy bản Oracle;
-//https://localhost:8080/api nếu chạy bản Spring Boot trên máy cá nhân
+//http://localhost:8080/api nếu chạy bản Spring Boot trên máy cá nhân
 
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
@@ -28,7 +28,9 @@ axiosClient.interceptors.request.use(
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
-      } catch (_) {}
+      } catch {
+        // Ignore malformed cache data and continue request without Authorization header.
+      }
     }
     return config;
   },

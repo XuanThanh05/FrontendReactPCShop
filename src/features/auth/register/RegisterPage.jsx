@@ -75,16 +75,16 @@ export default function RegisterPage() {
       navigate('/');
     } catch (error) {
       let message = error?.message || 'Đăng ký thất bại. Vui lòng thử lại.';
-      
+
       // Map server error messages to user-friendly messages
-      if (message.includes('unauthorized') || message.includes('Unauthorized')) {
-        message = 'Email hoặc username đã tồn tại.';
+      if (message.includes('phone') || message.includes('Phone')) {
+        message = 'Số điện thoại đã được sử dụng. Vui lòng dùng số khác.';
       } else if (message.includes('email') || message.includes('Email')) {
         message = 'Email đã được sử dụng. Vui lòng dùng email khác.';
       } else if (message.includes('username') || message.includes('Username')) {
         message = 'Username đã tồn tại. Vui lòng chọn username khác.';
       }
-      
+
       setErrorMessage(message);
     } finally {
       setIsSubmitting(false);

@@ -17,7 +17,7 @@ function Input({ label, ...props }) {
 export default function LogInPage() {
   const { login, currentUser } = useAuth();
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,14 +50,14 @@ export default function LogInPage() {
     event.preventDefault();
     setErrorMessage('');
 
-    if (!username.trim() || !password.trim()) {
-      setErrorMessage('Vui lòng nhập đầy đủ username và mật khẩu.');
+    if (!identifier.trim() || !password.trim()) {
+      setErrorMessage('Vui lòng nhập đầy đủ username, số điện thoại hoặc email và mật khẩu.');
       return;
     }
 
     try {
       setIsSubmitting(true);
-      const user = await login({ username, password });
+      const user = await login({ identifier, password });
       navigate(user.role === 'admin' ? '/admin/users' : '/');
     } catch (error) {
       setErrorMessage(error?.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
@@ -117,11 +117,11 @@ export default function LogInPage() {
           <form onSubmit={handleSubmit}>
             <div className="auth-form-group">
               <Input
-                label="Username"
-                placeholder="Nhập username của bạn"
+                label="Username / Số điện thoại / Email"
+                placeholder="Nhập username, số điện thoại hoặc email"
                 type="text"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
+                value={identifier}
+                onChange={(event) => setIdentifier(event.target.value)}
               />
               <Input
                 label="Mật khẩu"

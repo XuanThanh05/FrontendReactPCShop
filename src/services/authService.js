@@ -61,12 +61,14 @@ function normalizeApiError(error, fallbackMessage) {
   return fallbackMessage;
 }
 
-export async function loginWithApi({ username, password }) {
+export async function loginWithApi({ identifier, username, password }) {
   try {
+    const loginIdentifier = (identifier || username || "").trim();
+
     const response = await axiosClient.post(
       "/auth/login",
       {
-        username: username?.trim(),
+        identifier: loginIdentifier,
         password,
       },
       { withCredentials: true }
