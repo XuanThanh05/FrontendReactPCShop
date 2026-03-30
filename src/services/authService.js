@@ -27,12 +27,50 @@ function readCachedAuth() {
   }
 }
 
+function normalizeToken(tokenValue, tokenTypeValue = "Bearer") {
+  if (typeof tokenValue !== "string") {
+    return { accessToken: null, tokenType: tokenTypeValue || "Bearer" };
+  }
+
+  const trimmed = tokenValue.trim();
+  if (!trimmed) {
+    return { accessToken: null, tokenType: tokenTypeValue || "Bearer" };
+  }
+
+  const [maybeType, ...rest] = trimmed.split(" ");
+  if (rest.length > 0 && /^bearer$/i.test(maybeType)) {
+    return {
+      accessToken: rest.join(" ").trim() || null,
+      tokenType: "Bearer",
+    };
+  }
+
+  return {
+    accessToken: trimmed,
+    tokenType: tokenTypeValue || "Bearer",
+  };
+}
+
+function isAnonymousPayload(payload) {
+  const username = String(payload?.username || "").trim().toLowerCase();
+  const hasAnonymousAuthority = Array.isArray(payload?.authorities)
+    ? payload.authorities.some((item) =>
+        String(item?.authority || "")
+          .toUpperCase()
+          .includes("ANONYMOUS")
+      )
+    : false;
+
+  return username === "anonymoususer" || hasAnonymousAuthority;
+}
+
 function mapAuthPayload(payload, fallbackAuth = null) {
   const username = payload?.username || "";
   const role = extractRole(payload?.role, payload?.authorities || []);
-  const accessToken =
+  const rawAccessToken =
     payload?.accessToken || payload?.token || payload?.jwt || fallbackAuth?.accessToken || fallbackAuth?.token || fallbackAuth?.jwt || null;
-  const tokenType = payload?.tokenType || fallbackAuth?.tokenType || "Bearer";
+  const rawTokenType = payload?.tokenType || fallbackAuth?.tokenType || "Bearer";
+  const { accessToken, tokenType } = normalizeToken(rawAccessToken, rawTokenType);
 
   return {
     id: payload?.customerId || username,
@@ -112,6 +150,11 @@ export async function getCurrentUserFromApi() {
   try {
     const cachedAuth = readCachedAuth();
     const response = await axiosClient.get("/auth/me", { withCredentials: true });
+
+    if (isAnonymousPayload(response.data)) {
+      return cachedAuth || null;
+    }
+
     return mapAuthPayload(response.data, cachedAuth);
   } catch (error) {
     if (error?.response?.status === 401 || error?.response?.status === 403) {

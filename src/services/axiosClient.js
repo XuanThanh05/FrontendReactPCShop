@@ -37,9 +37,12 @@ axiosClient.interceptors.request.use(
     if (authCache) {
       try {
         const user = JSON.parse(authCache);
-        const token = user.token ?? user.accessToken ?? user.jwt;
+        const token = (user.token ?? user.accessToken ?? user.jwt ?? "").toString().trim();
+        const tokenType = (user.tokenType || "Bearer").toString().trim() || "Bearer";
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+          config.headers.Authorization = /^bearer\s+/i.test(token)
+            ? token
+            : `${tokenType} ${token}`;
         }
       } catch {
         // Ignore malformed cache data and continue request without Authorization header.

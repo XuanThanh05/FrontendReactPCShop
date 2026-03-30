@@ -1,5 +1,30 @@
 import axiosClient from "./axiosClient";
 
+function buildAdminAuthConfig() {
+  const config = { withCredentials: true };
+
+  try {
+    const raw = localStorage.getItem("pcshop_auth_cache");
+    if (!raw) return config;
+
+    const parsed = JSON.parse(raw);
+    const token = String(parsed?.accessToken || parsed?.token || parsed?.jwt || "").trim();
+    if (!token) return config;
+
+    const tokenType = String(parsed?.tokenType || "Bearer").trim() || "Bearer";
+    const authValue = /^bearer\s+/i.test(token) ? token : `${tokenType} ${token}`;
+
+    return {
+      ...config,
+      headers: {
+        Authorization: authValue,
+      },
+    };
+  } catch {
+    return config;
+  }
+}
+
 function toUserRow(apiUser) {
   const role = String(apiUser?.role || "CUSTOMER").toUpperCase();
 
@@ -31,7 +56,7 @@ function normalizeApiError(error, fallbackMessage) {
 
 export async function getAdminUsersApi() {
   try {
-    const response = await axiosClient.get("/admin/users", { withCredentials: true });
+    const response = await axiosClient.get("/admin/users", buildAdminAuthConfig());
     const rows = Array.isArray(response.data) ? response.data : [];
     return rows.map(toUserRow);
   } catch (error) {
@@ -41,7 +66,7 @@ export async function getAdminUsersApi() {
 
 export async function deleteAdminUserApi(userId) {
   try {
-    await axiosClient.delete(`/admin/users/${userId}`, { withCredentials: true });
+    await axiosClient.delete(`/admin/users/${userId}`, buildAdminAuthConfig());
   } catch (error) {
     throw new Error(normalizeApiError(error, "Không thể xóa tài khoản."));
   }
@@ -52,7 +77,7 @@ export async function updateAdminUserStatusApi(userId, enabled) {
     await axiosClient.put(
       `/admin/users/${userId}/status`,
       { enabled },
-      { withCredentials: true }
+      buildAdminAuthConfig()
     );
   } catch (error) {
     throw new Error(normalizeApiError(error, "Không thể cập nhật trạng thái tài khoản."));
