@@ -47,11 +47,19 @@ function mapAuthPayload(payload, fallbackAuth = null) {
 }
 
 function normalizeApiError(error, fallbackMessage) {
-  const responseMessage = error?.response?.data?.message;
+  const responseData = error?.response?.data;
+  const responseMessage = responseData?.message;
   const statusText = error?.response?.statusText;
 
   if (responseMessage && typeof responseMessage === "string") {
     return responseMessage;
+  }
+
+  if (responseData && typeof responseData === "object") {
+    const firstValue = Object.values(responseData)[0];
+    if (typeof firstValue === "string" && firstValue.trim()) {
+      return firstValue;
+    }
   }
 
   if (statusText && typeof statusText === "string") {
@@ -68,7 +76,7 @@ export async function loginWithApi({ identifier, username, password }) {
     const response = await axiosClient.post(
       "/auth/login",
       {
-        identifier: loginIdentifier,
+        username: loginIdentifier,
         password,
       },
       { withCredentials: true }

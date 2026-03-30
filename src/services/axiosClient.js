@@ -19,6 +19,19 @@ const axiosClient = axios.create({
 // Tự động gắn JWT token vào mọi request
 axiosClient.interceptors.request.use(
   (config) => {
+    const requestUrl = String(config.url || "");
+    const isPublicAuthRequest =
+      requestUrl.includes("/auth/login") ||
+      requestUrl.includes("/auth/register") ||
+      requestUrl.includes("/auth/logout");
+
+    if (isPublicAuthRequest) {
+      if (config.headers?.Authorization) {
+        delete config.headers.Authorization;
+      }
+      return config;
+    }
+
     // Lấy token từ localStorage — điều chỉnh key nếu bạn lưu khác
     const authCache = localStorage.getItem("pcshop_auth_cache");
     if (authCache) {

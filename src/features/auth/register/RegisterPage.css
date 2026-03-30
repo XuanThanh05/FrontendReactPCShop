@@ -27,6 +27,18 @@
   margin-top: 8px;
 }
 
+.auth-input.auth-input-error {
+  border-color: #dc2626;
+  background-color: #fef2f2;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.auth-field-error {
+  color: #b91c1c;
+  font-size: 12px;
+  margin-top: -2px;
+}
+
 .auth-check-line {
   margin-top: 12px;
   display: flex;
