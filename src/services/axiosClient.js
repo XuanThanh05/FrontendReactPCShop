@@ -2,10 +2,11 @@ import axios from "axios";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.PROD ? "/api" : "http://localhost:8080/api");
+  (import.meta.env.PROD ? "/api" : "http://161.118.200.236/api");
 
 
-//Hoặc "http://161.118.200.236/api" nếu muốn chạy bản Oracle;
+//http://161.118.200.236/api nếu muốn chạy bản Oracle;
+//https://localhost:8080/api nếu chạy bản Spring Boot trên máy cá nhân
 
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
