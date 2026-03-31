@@ -165,6 +165,26 @@ export async function getCurrentUserFromApi() {
   }
 }
 
+export async function loginWithGoogleApi(credentialResponse) {
+  try {
+    if (!credentialResponse || !credentialResponse.credential) {
+      throw new Error("Google credential không hợp lệ");
+    }
+
+    const response = await axiosClient.post(
+      "/auth/login-google",
+      {
+        idToken: credentialResponse.credential,
+      },
+      { withCredentials: true }
+    );
+
+    return mapAuthPayload(response.data);
+  } catch (error) {
+    throw new Error(normalizeApiError(error, "Đăng nhập Google thất bại."));
+  }
+}
+
 export async function logoutApi() {
   try {
     await axiosClient.post("/auth/logout", null, { withCredentials: true });

@@ -161,7 +161,6 @@
 .auth-grid-2 {
   margin-top: 12px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
@@ -222,7 +221,7 @@
 
 @media (max-width: 760px) {
   .auth-grid-2 {
-    grid-template-columns: 1fr;
+    display: block;
   }
 
   .auth-action-row {

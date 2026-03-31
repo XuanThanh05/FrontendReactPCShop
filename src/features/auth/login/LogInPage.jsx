@@ -1,6 +1,7 @@
 ﻿import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import '../AuthBase.css';
 import './LogInPage.css';
 import { useAuth } from '../useAuth';
@@ -15,8 +16,9 @@ function Input({ label, ...props }) {
 }
 
 export default function LogInPage() {
-  const { login, currentUser } = useAuth();
+  const { login, loginWithGoogle, currentUser } = useAuth();
   const navigate = useNavigate();
+  const isGoogleLoginEnabled = Boolean((import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim());
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -64,6 +66,23 @@ export default function LogInPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setErrorMessage('');
+    try {
+      setIsSubmitting(true);
+      await loginWithGoogle(credentialResponse);
+      navigate('/');
+    } catch (error) {
+      setErrorMessage(error?.message || 'Đăng nhập Google thất bại. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setErrorMessage('Đăng nhập Google thất bại hoặc bị hủy.');
   };
 
   return (
@@ -142,8 +161,26 @@ export default function LogInPage() {
 
           <div className="auth-divider">Hoặc đăng nhập bằng</div>
           <div className="auth-grid-2 auth-social-grid">
-            <button className="auth-ghost-btn">Google</button>
-            <button className="auth-ghost-btn">Zalo</button>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              {isGoogleLoginEnabled ? (
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  type="standard"
+                  theme="outline"
+                  size="large"
+                  text="signin_with"
+                  shape="rectangular"
+                  logo_alignment="left"
+                  locale="vi"
+                  width={280}
+                />
+              ) : (
+                <button className="auth-ghost-btn" disabled>
+                  Google 
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="auth-text-center" style={{ marginTop: 18, fontSize: 14, color: '#334155' }}>

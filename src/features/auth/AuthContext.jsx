@@ -3,6 +3,7 @@ import {
   getCurrentUserFromApi,
   isAdminUser,
   loginWithApi,
+  loginWithGoogleApi,
   logoutApi,
   registerWithApi,
 } from "../../services/authService";
@@ -82,6 +83,13 @@ export default function AuthProvider({ children }) {
     return createdUser;
   };
 
+  const loginWithGoogle = async (credentialResponse) => {
+    const loggedInUser = await loginWithGoogleApi(credentialResponse);
+    setCurrentUser(loggedInUser);
+    writeCachedUser(loggedInUser);
+    return loggedInUser;
+  };
+
   const logout = async () => {
     await logoutApi();
     setCurrentUser(null);
@@ -115,6 +123,7 @@ export default function AuthProvider({ children }) {
       isAuthenticated: Boolean(currentUser),
       isAdmin: isAdminUser(currentUser),
       login,
+      loginWithGoogle,
       register,
       logout,
       refreshSession,
