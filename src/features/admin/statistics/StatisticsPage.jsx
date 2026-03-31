@@ -166,9 +166,9 @@ export default function StatisticsPage() {
     ? Math.max(...stats.topProducts.map(p => p.quantity))
     : 1;
 
-  // Tính số lượng hàng tồn kho thấp (< 10 và > 0)
+  // ✅ Tính số lượng hàng tồn kho thấp - bao gồm cả hàng hết (stockQuantity = 0) và tồn kho < 10
   const lowStockProducts = stats.warehouseReport?.filter(
-    item => item.stockQuantity > 0 && item.stockQuantity < 10
+    item => (item.stockQuantity || 0) < 10
   ).length || 0;
 
   return (
