@@ -26,17 +26,16 @@ npm install react-router-dom
 # Mock data:
 
 > [!NOTE] 
-
-> Dữ liệu mock để test trước khi có backend
+> Tài khoản test có thể sử dụng để kiểm tra
 
 - Tài khoản admin:
 ```js
-0909000000 
+admin/0123456789 
 admin123
 ```
 
 - Tài khoản user
 ```js
-0909000001
+user1
 user123
 ```
