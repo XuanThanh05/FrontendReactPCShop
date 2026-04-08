@@ -176,9 +176,7 @@ export default function LogInPage() {
           <div className="auth-text-center" style={{ marginTop: 10 }}>
             <Link to="/" className="auth-link">Quên mật khẩu?</Link>
           </div>
-          <div className="auth-text-center" style={{ marginTop: 8 }}>
-            <Link to="/verify-email" className="auth-link">Chưa xác minh email? Nhập OTP tại đây</Link>
-          </div>
+         
 
           <div className="auth-divider">Hoặc đăng nhập bằng</div>
           <div className="auth-grid-2 auth-social-grid">
