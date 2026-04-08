@@ -25,19 +25,24 @@ export default function Home() {
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [products, setProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const pageSize = 10;
 
-  useEffect(() => {
-  const fetchProducts = async () => {
+  const fetchProducts = async (page = 0) => {
     try {
-      const res = await axiosClient.get('/products');
-      setProducts(res.data); // lưu tất cả sản phẩm từ backend
+      const res = await axiosClient.get(`/products/paged?page=${page}&size=${pageSize}`);
+      setProducts(res.data.content);
+      setTotalPages(res.data.totalPages);
+      setCurrentPage(page);
     } catch (err) {
       console.error("Lỗi khi lấy sản phẩm:", err);
     }
   };
 
-  fetchProducts();
-}, []);
+  useEffect(() => {
+    fetchProducts(0);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => {
@@ -106,6 +111,11 @@ export default function Home() {
                     <div className="product-price">{p.price.toLocaleString()} đ</div>
                   </Link>
                 ))}
+              </div>
+              <div className="pagination" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '20px' }}>
+                <button onClick={() => fetchProducts(currentPage - 1)} disabled={currentPage === 0}>Trước</button>
+                <span>Trang {currentPage + 1} / {totalPages}</span>
+                <button onClick={() => fetchProducts(currentPage + 1)} disabled={currentPage >= totalPages - 1}>Sau</button>
               </div>
             </section>
           </main>

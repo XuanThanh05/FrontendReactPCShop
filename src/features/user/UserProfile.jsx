@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { useAuth } from '../auth/useAuth';
@@ -12,9 +12,11 @@ import './UserProfile.css';
 export default function UserProfile() {
   const { currentUser, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('all');
-  const [currentMenu, setCurrentMenu] = useState('statistics');
+  const location = useLocation(); // ✅ Thêm useLocation
 
+  const [activeTab, setActiveTab] = useState('all');
+  // ✅ Đọc state từ navigate, nếu có menu: 'orders' thì mở thẳng tab đó
+  const [currentMenu, setCurrentMenu] = useState(location.state?.menu || 'statistics');
   const [purchaseHistory, setPurchaseHistory] = useState([]);
   const [combinedStatistics, setCombinedStatistics] = useState(null);
   const [loadingOrders, setLoadingOrders] = useState(true);
@@ -94,7 +96,6 @@ export default function UserProfile() {
           totalSpent: totalSpentAcc,
           statusStatistics: statusStatisticsArray
         });
-
       } catch (error) {
         console.error("Lỗi lấy lịch sử mua hàng:", error);
       } finally {
@@ -115,7 +116,6 @@ export default function UserProfile() {
   return (
     <div className="profile-page">
       <Header />
-
       <div className="profile-container">
         <aside className="profile-sidebar">
           <div className="profile-user-info">
@@ -129,10 +129,14 @@ export default function UserProfile() {
             <a href="#statistics" className={`profile-nav-item ${currentMenu === 'statistics' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentMenu('statistics'); }}>
               <span className="nav-icon">📊</span> Thống kê tài khoản
             </a>
-            <a href="#orders" className={`profile-nav-item ${currentMenu === 'orders' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentMenu('orders'); }}>
+            <a
+              href="#orders"
+              className={`profile-nav-item ${currentMenu === 'orders' ? 'active' : ''}`}
+              onClick={(e) => { e.preventDefault(); setCurrentMenu('orders'); }}
+            >
               <span className="nav-icon">📦</span> Đơn hàng đã mua
             </a>
-            
+
             {isAdmin && (
               <>
                 <a href="#admin-users" className={`profile-nav-item ${currentMenu === 'admin-users' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentMenu('admin-users'); }}>
@@ -152,7 +156,10 @@ export default function UserProfile() {
 
         <main className="profile-content">
           {currentMenu === 'statistics' && (
-            <UserOrderStatisticsDashboard statistics={combinedStatistics} loading={loadingOrders} />
+            <UserOrderStatisticsDashboard
+              statistics={combinedStatistics}
+              loading={loadingOrders}
+            />
           )}
 
           {currentMenu === 'orders' && (
@@ -180,7 +187,6 @@ export default function UserProfile() {
                 </button>
               </div>
 
-              {/* Danh sách đơn hàng */}
               <div className="order-list">
                 {loadingOrders ? (
                   <div style={{ padding: 40, textAlign: 'center' }}>Đang tải dữ liệu đơn hàng...</div>
@@ -229,23 +235,22 @@ export default function UserProfile() {
             </>
           )}
 
-          {currentMenu === 'admin-users' && (
-             <UserManagementPage />
-          )}
+              {currentMenu === 'admin-users' && (
+                <UserManagementPage />
+              )}
 
-          {currentMenu === 'admin-statistics' && (
-             <StatisticsPage />
-          )}
+              {currentMenu === 'admin-statistics' && (
+                <StatisticsPage />
+              )}
 
-          {currentMenu !== 'statistics' && currentMenu !== 'orders' && currentMenu !== 'admin-users' && currentMenu !== 'admin-statistics' && (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#7f8c8d' }}>
-              <h2>Tính năng đang phát triển</h2>
-              <p>Vui lòng chọn tính năng khả dụng ở thanh công cụ bên trái.</p>
-            </div>
-          )}
-        </main>
+              {currentMenu !== 'statistics' && currentMenu !== 'orders' && currentMenu !== 'admin-users' && currentMenu !== 'admin-statistics' && (
+                <div style={{ padding: '40px', textAlign: 'center', color: '#7f8c8d' }}>
+                  <h2>Tính năng đang phát triển</h2>
+                  <p>Vui lòng chọn tính năng khả dụng ở thanh công cụ bên trái.</p>
+                </div>
+              )}
+            </main>
       </div>
-
       <Footer />
     </div>
   );
