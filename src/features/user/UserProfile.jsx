@@ -4,7 +4,7 @@ import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { useAuth } from '../auth/useAuth';
 import UserOrderStatisticsDashboard from '../../components/UserOrderStatisticsDashboard';
-import { getMyOrderHistory } from '../../services/Orderservice';
+import { getMyOrderHistory } from '../../services/orderService';
 import UserManagementPage from '../admin/usermanagement/UserManagementPage';
 import StatisticsPage from '../admin/statistics/StatisticsPage';
 import './UserProfile.css';
