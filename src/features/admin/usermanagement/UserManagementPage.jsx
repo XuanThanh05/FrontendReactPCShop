@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import {
   deleteAdminUserApi,
   getAdminUsersApi,
@@ -22,8 +21,7 @@ function formatDate(dateString) {
 }
 
 export default function UserManagementPage() {
-  const { currentUser, logout } = useAuth();
-  const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -177,11 +175,6 @@ export default function UserManagementPage() {
     closeConfirmDialog();
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
   return (
     <div className="user-admin-page">
       {confirmDialog.open ? (
@@ -220,9 +213,6 @@ export default function UserManagementPage() {
           <Link to="/" className="secondary-link">← Về trang chủ</Link>
           <Link to="/admin/statistics" className="secondary-link">Xem thống kê</Link>
         </div>
-        <button type="button" className="danger-btn" onClick={handleLogout}>
-          Đăng xuất
-        </button>
       </div>
 
       <header className="user-admin-header">

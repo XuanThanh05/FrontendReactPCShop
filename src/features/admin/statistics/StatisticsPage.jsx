@@ -1,17 +1,9 @@
 // ============================================================
 // StatisticsPage.jsx - API-driven statistics from backend
-// Yêu cầu cài: npm install recharts
 // ============================================================
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import {
-  PieChart, Pie, Cell, Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-
-import { useAuth } from "../../auth/useAuth";
 import * as statisticsService from "../../../services/statisticsService";
 
 import "./StatisticsPage.css";
@@ -27,8 +19,6 @@ const formatMillions = (val) => {
 
 // ---- Component chính ----
 export default function StatisticsPage() {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -67,11 +57,6 @@ export default function StatisticsPage() {
 
     fetchStatistics();
   }, []);
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
 
   // Hàm xử lý sắp xếp bảng kho hàng
   const handleSort = (column) => {
@@ -130,9 +115,6 @@ export default function StatisticsPage() {
             <Link to="/" className="stats-nav-btn">← Về trang chủ</Link>
             <Link to="/admin/users" className="stats-nav-btn">Quản lý user</Link>
           </div>
-          <button type="button" className="stats-nav-btn danger" onClick={handleLogout}>
-            Đăng xuất
-          </button>
         </div>
         <p style={{ color: "red", padding: "20px" }}>Lỗi: {error}</p>
       </div>
@@ -143,21 +125,41 @@ export default function StatisticsPage() {
     return <div className="stats-page"><p>Không có dữ liệu</p></div>;
   }
 
-  // Chuẩn bị dữ liệu cho Pie chart - chuyển từ API format
+  // Chuẩn bị dữ liệu cho Order Status - chuyển từ API format
   const orderStatusData = stats.orderStatus
     ?.map((item) => {
+      // Map status thành statusText để hiển thị
+      const statusTextMap = {
+        PAID: "Đã Thanh Toán",
+        PENDING: "Chờ Xử Lý",
+        PROCESSING: "Đang Xử Lý",
+        SHIPPING: "Đang Giao",
+        COMPLETED: "Hoàn Thành",
+        DELIVERED: "Đã Giao",
+        CONFIRMED: "Xác Nhận",
+        DELIVERING: "Đang Giao Hàng",
+        CANCELLED: "Đã Hủy",
+      };
+
       const statusColors = {
         PAID: "#10b981",
         PENDING: "#f59e0b",
         PROCESSING: "#3b82f6",
         SHIPPING: "#8b5cf6",
         COMPLETED: "#06b6d4",
+        DELIVERED: "#10b981",
+        CONFIRMED: "#3b82f6",
+        DELIVERING: "#06b6d4",
         CANCELLED: "#ef4444",
       };
+
+      const statusKey = (item.status || item.tracking_status || "").toUpperCase();
+      const displayName = statusTextMap[statusKey] || statusKey || "Trạng thái khác";
+      
       return {
-        name: item.status,
+        name: displayName,
         value: item.count,
-        color: statusColors[item.status] || "#94a3b8",
+        color: statusColors[statusKey] || "#94a3b8",
       };
     })
     .filter((item) => item.value > 0) || [];
@@ -178,9 +180,6 @@ export default function StatisticsPage() {
           <Link to="/" className="stats-nav-btn">← Về trang chủ</Link>
           <Link to="/admin/users" className="stats-nav-btn">Quản lý user</Link>
         </div>
-        <button type="button" className="stats-nav-btn danger" onClick={handleLogout}>
-          Đăng xuất
-        </button>
       </div>
 
       {/* ---- Header ---- */}
@@ -228,40 +227,28 @@ export default function StatisticsPage() {
             <span className="chart-badge green">Tổng: {stats.totalOrders}</span>
           </div>
           {orderStatusData.length > 0 ? (
-            <>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={orderStatusData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={45}
-                    outerRadius={70}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {orderStatusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
-                    itemStyle={{ color: "#0f172a" }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="order-legend">
-                {orderStatusData.map((item, i) => (
-                  <div className="order-legend-item" key={i}>
-                    <span className="legend-left">
-                      <span className="legend-dot" style={{ background: item.color }} />
-                      {item.name}
-                    </span>
-                    <span className="legend-count">{item.value}</span>
+            <div className="order-status-list">
+              {orderStatusData.map((item, i) => {
+                const percent = stats.totalOrders > 0 ? (item.value / stats.totalOrders) * 100 : 0;
+                return (
+                  <div key={i} className="order-status-item">
+                    <div className="order-status-left">
+                      <span className="order-status-dot" style={{ backgroundColor: item.color }} />
+                      <span className="order-status-label">{item.name}</span>
+                    </div>
+                    <div className="order-status-bar-wrap">
+                      <div className="order-status-bar-bg">
+                        <div
+                          className="order-status-bar-fill"
+                          style={{ width: `${percent}%`, backgroundColor: item.color }}
+                        />
+                      </div>
+                    </div>
+                    <span className="order-status-count">{item.value}</span>
                   </div>
-                ))}
-              </div>
-            </>
+                );
+              })}
+            </div>
           ) : (
             <div className="no-data">Chưa có dữ liệu</div>
           )}
