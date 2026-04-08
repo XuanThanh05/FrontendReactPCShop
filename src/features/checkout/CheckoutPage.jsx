@@ -43,7 +43,6 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successData, setSuccessData] = useState(null);
   const [apiError, setApiError] = useState("");
-
   const [customer, setCustomer] = useState({
     fullName: currentUser?.fullName || "",
     phone: currentUser?.phone || "",
@@ -54,8 +53,7 @@ export default function CheckoutPage() {
   const shippingFee = deliveryType === "ship" ? (total >= 5000000 ? 0 : 30000) : 0;
   const grandTotal = useMemo(() => total + shippingFee, [total, shippingFee]);
 
-  const updateField = (key, value) =>
-    setCustomer((prev) => ({ ...prev, [key]: value }));
+  const updateField = (key, value) => setCustomer((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -66,7 +64,6 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Guard: phải đăng nhập
     if (!currentUser) {
       navigate("/login", { state: { from: "/checkout" } });
       return;
@@ -74,14 +71,14 @@ export default function CheckoutPage() {
 
     const payload = {
       totalAmount: grandTotal,
-      deliveryType,                         // "ship" | "store" → backend dùng để set trackingStatus
+      deliveryType,
       buyerName: customer.fullName,
       buyerPhone: customer.phone,
       address: customer.address,
       latitude: checkoutState.latitude ?? null,
       longitude: checkoutState.longitude ?? null,
       items: items.map((item) => ({
-        productId: item.id,                 // integer productId khớp với backend
+        productId: item.id,
         quantity: item.qty,
         priceAtPurchase: item.price,
       })),
@@ -89,7 +86,7 @@ export default function CheckoutPage() {
 
     setIsSubmitting(true);
     try {
-      const data = await createOrder(payload); // axiosClient tự gắn JWT
+      const data = await createOrder(payload);
       setSuccessData(data);
     } catch (err) {
       setApiError(err.message || "Đặt hàng thất bại, vui lòng thử lại.");
@@ -118,10 +115,11 @@ export default function CheckoutPage() {
             <button type="button" onClick={() => navigate("/")}>
               Về trang chủ
             </button>
+            {/* ✅ Truyền state menu: 'orders' để UserProfile tự chuyển tab */}
             <button
               type="button"
               className="outline"
-              onClick={() => navigate("/account")}
+              onClick={() => navigate("/account", { state: { menu: "orders" } })}
             >
               Xem đơn hàng
             </button>
@@ -228,7 +226,6 @@ export default function CheckoutPage() {
         {/* Order summary */}
         <aside className="checkout-summary-card">
           <h2>Đơn hàng của bạn</h2>
-
           <div className="checkout-item-list">
             {items.map((item) => (
               <div className="checkout-item" key={item.id}>
@@ -241,7 +238,6 @@ export default function CheckoutPage() {
               </div>
             ))}
           </div>
-
           <div className="checkout-row">
             <span>Tạm tính</span>
             <span>{fmt(total)}</span>
