@@ -110,12 +110,6 @@ export default function StatisticsPage() {
   if (error) {
     return (
       <div className="stats-page">
-        <div className="stats-topbar">
-          <div className="stats-topbar-links">
-            <Link to="/" className="stats-nav-btn">← Về trang chủ</Link>
-            <Link to="/admin/users" className="stats-nav-btn">Quản lý user</Link>
-          </div>
-        </div>
         <p style={{ color: "red", padding: "20px" }}>Lỗi: {error}</p>
       </div>
     );
@@ -175,20 +169,7 @@ export default function StatisticsPage() {
 
   return (
     <div className="stats-page">
-      <div className="stats-topbar">
-        <div className="stats-topbar-links">
-          <Link to="/" className="stats-nav-btn">← Về trang chủ</Link>
-          <Link to="/admin/users" className="stats-nav-btn">Quản lý user</Link>
-        </div>
-      </div>
-
-      {/* ---- Header ---- */}
-      <div className="stats-header">
-        <div>
-          <h1>📊 Thống kê & Báo cáo</h1>
-          <p>Tổng quan hoạt động kinh doanh — Cập nhật mới nhất</p>
-        </div>
-      </div>
+      <h2 className="content-title">📊 Thống kê & Báo cáo</h2>
 
       {/* ---- Summary Cards ---- */}
       <div className="summary-grid">

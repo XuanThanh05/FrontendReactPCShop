@@ -208,19 +208,8 @@ export default function UserManagementPage() {
         </div>
       ) : null}
 
-      <div className="admin-topbar">
-        <div className="admin-topbar-left">
-          <Link to="/" className="secondary-link">← Về trang chủ</Link>
-          <Link to="/admin/statistics" className="secondary-link">Xem thống kê</Link>
-        </div>
-      </div>
 
-      <header className="user-admin-header">
-        <div>
-          <h1>Quản lý user</h1>
-          <p>Quản trị tài khoản người dùng bằng dữ liệu thật từ database.</p>
-        </div>
-      </header>
+      <h2 className="content-title">Quản lý User</h2>
 
       <section className="user-admin-panel">
         {errorMessage ? <div className="top-error">{errorMessage}</div> : null}
@@ -273,9 +262,13 @@ export default function UserManagementPage() {
                       <strong>{user.fullName}</strong>
                       {isCurrentUser ? <span className="current-tag">Tài khoản của bạn</span> : null}
                     </td>
-                    <td>{user.username || '-'}</td>
+                    <td title={user.username?.length > 10 ? user.username : ""}>
+                      {user.username?.length > 10 ? user.username.substring(0, 10) + '...' : (user.username || '-')}
+                    </td>
                     <td>{user.phone || '-'}</td>
-                    <td>{user.email}</td>
+                    <td title={user.email?.length > 10 ? user.email : ""}>
+                      {user.email?.length > 10 ? user.email.substring(0, 10) + '...' : user.email}
+                    </td>
                     <td>
                       <span className={`role-badge ${user.role}`}>{user.role}</span>
                     </td>

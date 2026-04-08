@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
@@ -135,8 +135,6 @@ export default function Header({ onLoginClick }) {
         </div>
         <div className="pc-header-actions">
           <Link to="/cart" className="header-link">🛒 Giỏ hàng</Link>
-
-          {isAdmin ? <Link to="/admin/users" className="header-link">🛠 Quản lý user</Link> : null}
 
           {currentUser ? (
             <>

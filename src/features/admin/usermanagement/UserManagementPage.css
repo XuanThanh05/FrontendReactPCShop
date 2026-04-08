@@ -1,6 +1,5 @@
 .user-admin-page {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  background: transparent;
   padding: 0;
   color: #0f172a;
 }
@@ -133,7 +132,7 @@
   border-radius: 16px;
   padding: 16px;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
-  margin: 0 28px 28px 28px;
+  margin: 0;
 }
 
 .user-filters {
@@ -176,6 +175,7 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: #64748b;
+  white-space: nowrap;
 }
 
 .current-tag {
@@ -196,6 +196,7 @@
   padding: 4px 10px;
   font-size: 12px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .role-badge.admin {
@@ -233,6 +234,8 @@
   font-weight: 700;
   padding: 6px 10px;
   cursor: pointer;
+  min-width: 65px;
+  text-align: center;
 }
 
 .action-btn.warning {
