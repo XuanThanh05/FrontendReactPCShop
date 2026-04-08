@@ -81,7 +81,7 @@ export default function Home() {
             </section>
             <section className="promo-row">
               <a target="_blank" rel="noreferrer" href="/"><img src="https://cdn2.cellphones.com.vn/insecure/rs:fill:0:300/q:50/plain/https://dashboard.cellphones.com.vn/storage/macbook-giao-xa-2026.png" alt="Studio Display" /></a>
-              <a target="_blank" rel="noreferrer" href="/"><img src="https://cdn2.cellphones.com.vn/insecure/rs:fill:0:300/q:50/plain/https://dashboard.cellphones.com.vn/storage/RightBanner-display.png" alt="Galaxy A17 5G" /></a>
+              <a target="_blank" rel="noreferrer" href="/"><img src="https://cdn2.cellphones.com.vn/insecure/rs:fill:690:300/q:50/plain/https://dashboard.cellphones.com.vn/storage/RightBanner_PRE_MacBookAirM5.png" alt="MacBook Air M5" /></a>
               <a target="_blank" rel="noreferrer" href="/"><img src="https://cdn2.cellphones.com.vn/insecure/rs:fill:0:300/q:50/plain/https://dashboard.cellphones.com.vn/storage/a-17.png" alt="Mua laptop online" /></a>
             </section>
             <section className="student-banner"><a href="https://cdn2.cellphones.com.vn/insecure/rs:fill:0:75/q:100/plain/https://dashboard.cellphones.com.vn/storage/s-edu-2-0-special-desk.gif" target="_blank" rel="noreferrer"><img src="https://cdn2.cellphones.com.vn/insecure/rs:fill:0:75/q:100/plain/https://dashboard.cellphones.com.vn/storage/s-edu-2-0-special-desk.gif" alt="Say Hi" /></a></section>
