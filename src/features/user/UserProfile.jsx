@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { useAuth } from '../auth/useAuth';
@@ -32,8 +32,13 @@ const mockOrders = [
 
 export default function UserProfile() {
   const { currentUser, logout } = useAuth();
+  const location = useLocation();
+
+  // Nếu navigate từ checkout success với state { menu: "orders" } thì mở thẳng tab đơn hàng
+  const initialMenu = location.state?.menu ?? 'statistics';
+
   const [activeTab, setActiveTab] = useState('all');
-  const [currentMenu, setCurrentMenu] = useState('statistics'); // Chuyển default về Thống kê cho dễ test
+  const [currentMenu, setCurrentMenu] = useState(initialMenu);
 
   const user = currentUser || { fullName: 'Khách hàng, Nguyễn Văn A' };
 
@@ -86,58 +91,31 @@ export default function UserProfile() {
               <h2 className="content-title">Đơn hàng đã mua</h2>
 
               <div className="order-tabs">
-                <button
-                  className={`order-tab-btn ${activeTab === 'all' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('all')}
-                >
-                  Tất cả
-                </button>
-                <button
-                  className={`order-tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('pending')}
-                >
-                  Chờ xử lý
-                </button>
-                <button
-                  className={`order-tab-btn ${activeTab === 'confirmed' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('confirmed')}
-                >
-                  Đã xác nhận
-                </button>
-                <button
-                  className={`order-tab-btn ${activeTab === 'shipping' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('shipping')}
-                >
-                  Đang chuyển hàng
-                </button>
-                <button
-                  className={`order-tab-btn ${activeTab === 'delivered' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('delivered')}
-                >
-                  Đang giao hàng
-                </button>
-                <button
-                  className={`order-tab-btn ${activeTab === 'canceled' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('canceled')}
-                >
-                  Đã hủy
-                </button>
-                <button
-                  className={`order-tab-btn ${activeTab === 'success' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('success')}
-                >
-                  Thành công
-                </button>
+                {[
+                  { key: 'all', label: 'Tất cả' },
+                  { key: 'pending', label: 'Chờ xử lý' },
+                  { key: 'confirmed', label: 'Đã xác nhận' },
+                  { key: 'shipping', label: 'Đang chuyển hàng' },
+                  { key: 'delivered', label: 'Đang giao hàng' },
+                  { key: 'canceled', label: 'Đã hủy' },
+                  { key: 'success', label: 'Thành công' },
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    className={`order-tab-btn ${activeTab === tab.key ? 'active' : ''}`}
+                    onClick={() => setActiveTab(tab.key)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
 
-              {/* Danh sách đơn hàng */}
               <div className="order-list">
                 {mockOrders.map((order) => (
                   <div key={order.id} className={`order-card ${order.status === 'Chờ xử lý' ? 'highlight' : ''}`}>
                     <div className="order-status-right">
                       Trạng thái: <span>{order.status}</span>
                     </div>
-
                     <div className="order-details">
                       <div className="order-image">
                         <img src={order.image} alt={order.productName} />

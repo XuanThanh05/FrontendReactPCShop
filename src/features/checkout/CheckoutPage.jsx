@@ -121,7 +121,7 @@ export default function CheckoutPage() {
             <button
               type="button"
               className="outline"
-              onClick={() => navigate("/orders/my-history")}
+              onClick={() => navigate("/account")}
             >
               Xem đơn hàng
             </button>
