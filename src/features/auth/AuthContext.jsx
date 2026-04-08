@@ -78,8 +78,13 @@ export default function AuthProvider({ children }) {
 
   const register = async (payload) => {
     const createdUser = await registerWithApi(payload);
-    setCurrentUser(createdUser);
-    writeCachedUser(createdUser);
+    if (createdUser?.accessToken) {
+      setCurrentUser(createdUser);
+      writeCachedUser(createdUser);
+    } else {
+      setCurrentUser(null);
+      clearCachedUser();
+    }
     return createdUser;
   };
 

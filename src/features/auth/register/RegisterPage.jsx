@@ -135,14 +135,19 @@ export default function RegisterPage() {
 
     try {
       setIsSubmitting(true);
-      await register({
+      const registerResult = await register({
         fullName: form.fullName,
         username: form.username,
         password: form.password,
         email: form.email,
         phone: form.phone,
       });
-      navigate('/');
+
+      navigate('/verify-email', {
+        state: {
+          email: registerResult?.email || form.email.trim(),
+        },
+      });
     } catch (error) {
       const mappedMessage = mapRegisterErrorMessage(error);
       const mappedField = mapRegisterErrorField(mappedMessage);

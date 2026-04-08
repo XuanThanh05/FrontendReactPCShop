@@ -122,7 +122,12 @@ export async function loginWithApi({ identifier, username, password }) {
 
     return mapAuthPayload(response.data);
   } catch (error) {
-    throw new Error(normalizeApiError(error, "Đăng nhập thất bại."));
+    const responseData = error?.response?.data;
+    const normalizedError = new Error(normalizeApiError(error, "Đăng nhập thất bại."));
+    normalizedError.email = responseData?.email || null;
+    normalizedError.requiresEmailVerification = Boolean(responseData?.requiresEmailVerification);
+    normalizedError.emailVerified = Boolean(responseData?.emailVerified);
+    throw normalizedError;
   }
 }
 
@@ -140,9 +145,53 @@ export async function registerWithApi({ username, fullName, email, password, pho
       { withCredentials: false }
     );
 
-    return mapAuthPayload(response.data);
+    const payload = response.data || {};
+    if (payload?.accessToken || payload?.token || payload?.jwt) {
+      return mapAuthPayload(payload);
+    }
+
+    return {
+      message: payload?.message || "Đăng ký thành công. Vui lòng xác minh email bằng OTP",
+      email: payload?.email || email?.trim(),
+      requiresEmailVerification: Boolean(payload?.requiresEmailVerification ?? true),
+      emailVerified: Boolean(payload?.emailVerified ?? false),
+      accessToken: null,
+    };
   } catch (error) {
     throw new Error(normalizeApiError(error, "Đăng ký thất bại."));
+  }
+}
+
+export async function verifyEmailOtpApi({ email, otp }) {
+  try {
+    const response = await axiosClient.post(
+      "/auth/verify-email",
+      {
+        email: email?.trim(),
+        otp: otp?.trim(),
+      },
+      { withCredentials: false }
+    );
+
+    return response?.data || { message: "Xác minh email thành công" };
+  } catch (error) {
+    throw new Error(normalizeApiError(error, "Xác minh email thất bại."));
+  }
+}
+
+export async function resendEmailOtpApi({ email }) {
+  try {
+    const response = await axiosClient.post(
+      "/auth/resend-otp",
+      {
+        email: email?.trim(),
+      },
+      { withCredentials: false }
+    );
+
+    return response?.data || { message: "Đã gửi lại OTP" };
+  } catch (error) {
+    throw new Error(normalizeApiError(error, "Gửi lại OTP thất bại."));
   }
 }
 
@@ -181,7 +230,12 @@ export async function loginWithGoogleApi(credentialResponse) {
 
     return mapAuthPayload(response.data);
   } catch (error) {
-    throw new Error(normalizeApiError(error, "Đăng nhập Google thất bại."));
+    const responseData = error?.response?.data;
+    const normalizedError = new Error(normalizeApiError(error, "Đăng nhập Google thất bại."));
+    normalizedError.email = responseData?.email || null;
+    normalizedError.requiresEmailVerification = Boolean(responseData?.requiresEmailVerification);
+    normalizedError.emailVerified = Boolean(responseData?.emailVerified);
+    throw normalizedError;
   }
 }
 

@@ -3,6 +3,7 @@ import Home from "../features/homepage/Home";
 import ProductDetailPage from "../features/productdetail/ProductDetailPage";
 import LogInPage from "../features/auth/login/LogInPage";
 import RegisterPage from "../features/auth/register/RegisterPage";
+import VerifyEmailPage from "../features/auth/verify/VerifyEmailPage";
 import StatisticsPage from "../features/admin/statistics/StatisticsPage";
 import SearchPage from "../features/searchpage/SearchPage";
 import UserManagementPage from "../features/admin/usermanagement/UserManagementPage";
@@ -19,6 +20,7 @@ export default function AppRoutes() {
         <Route path="/product/:id" element={<ProductDetailPage />} />
         <Route path="/login" element={<LogInPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<CheckoutPage />} />

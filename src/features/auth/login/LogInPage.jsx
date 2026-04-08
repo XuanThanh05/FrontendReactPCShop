@@ -62,6 +62,15 @@ export default function LogInPage() {
       const user = await login({ identifier, password });
       navigate(user.role === 'admin' ? '/admin/users' : '/');
     } catch (error) {
+      if (error?.requiresEmailVerification || String(error?.message || '').toLowerCase().includes('email chưa được xác minh')) {
+        navigate('/verify-email', {
+          state: {
+            email: error?.email || identifier.trim(),
+            message: error?.message,
+          },
+        });
+        return;
+      }
       setErrorMessage(error?.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
@@ -75,6 +84,15 @@ export default function LogInPage() {
       await loginWithGoogle(credentialResponse);
       navigate('/');
     } catch (error) {
+      if (error?.requiresEmailVerification || String(error?.message || '').toLowerCase().includes('email chưa được xác minh')) {
+        navigate('/verify-email', {
+          state: {
+            email: error?.email || '',
+            message: error?.message,
+          },
+        });
+        return;
+      }
       setErrorMessage(error?.message || 'Đăng nhập Google thất bại. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
@@ -157,6 +175,9 @@ export default function LogInPage() {
           </form>
           <div className="auth-text-center" style={{ marginTop: 10 }}>
             <Link to="/" className="auth-link">Quên mật khẩu?</Link>
+          </div>
+          <div className="auth-text-center" style={{ marginTop: 8 }}>
+            <Link to="/verify-email" className="auth-link">Chưa xác minh email? Nhập OTP tại đây</Link>
           </div>
 
           <div className="auth-divider">Hoặc đăng nhập bằng</div>
