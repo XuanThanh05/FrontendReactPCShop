@@ -105,9 +105,7 @@ export default function UserProfile() {
 
   const filteredOrders = purchaseHistory.filter(order => {
     if (activeTab === 'all') return true;
-    if (activeTab === 'pending' && order.status === 'Chờ xử lý') return true;
     if (activeTab === 'shipping' && order.status === 'Đang giao hàng') return true;
-    if (activeTab === 'canceled' && order.status === 'Đã hủy') return true;
     if (activeTab === 'success' && order.status === 'Thành công') return true;
     return false;
   });
@@ -168,22 +166,10 @@ export default function UserProfile() {
                   Tất cả
                 </button>
                 <button
-                  className={`order-tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('pending')}
-                >
-                  Chờ xử lý
-                </button>
-                <button
                   className={`order-tab-btn ${activeTab === 'shipping' ? 'active' : ''}`}
                   onClick={() => setActiveTab('shipping')}
                 >
                   Đang giao hàng
-                </button>
-                <button
-                  className={`order-tab-btn ${activeTab === 'canceled' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('canceled')}
-                >
-                  Đã hủy
                 </button>
                 <button
                   className={`order-tab-btn ${activeTab === 'success' ? 'active' : ''}`}
