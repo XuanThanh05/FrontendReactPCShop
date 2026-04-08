@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../AuthBase.css';
@@ -39,7 +39,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (!currentUser) return;
-    navigate(currentUser.role === 'admin' ? '/admin/users' : '/', { replace: true });
+    navigate('/', { replace: true });
   }, [currentUser, navigate]);
 
   const updateField = (key, value) => {

@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
@@ -45,7 +45,7 @@ export default function LogInPage() {
 
   useEffect(() => {
     if (!currentUser) return;
-    navigate(currentUser.role === 'admin' ? '/admin/users' : '/', { replace: true });
+    navigate('/', { replace: true });
   }, [currentUser, navigate]);
 
   const handleSubmit = async (event) => {
@@ -60,7 +60,7 @@ export default function LogInPage() {
     try {
       setIsSubmitting(true);
       const user = await login({ identifier, password });
-      navigate(user.role === 'admin' ? '/admin/users' : '/');
+      navigate('/');
     } catch (error) {
       if (error?.requiresEmailVerification || String(error?.message || '').toLowerCase().includes('email chưa được xác minh')) {
         navigate('/verify-email', {
