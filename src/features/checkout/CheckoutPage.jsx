@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
+import { createOrder } from "../../services/orderService";
 import "./CheckoutPage.css";
 
 const DEFAULT_CHECKOUT_ITEMS = [
   {
-    id: "mock-1",
+    id: 1,
     name: "Tecno Pova 7 8GB 128GB-Nâu",
     price: 4490000,
     qty: 1,
@@ -20,6 +21,11 @@ const PAYMENT_METHODS = [
   { id: "card", label: "Thẻ ATM / Visa / MasterCard" },
 ];
 
+const DELIVERY_TYPES = [
+  { id: "ship", label: "Giao hàng tận nơi" },
+  { id: "store", label: "Nhận tại cửa hàng" },
+];
+
 const fmt = (n) => n.toLocaleString("vi-VN") + "đ";
 
 export default function CheckoutPage() {
@@ -31,7 +37,12 @@ export default function CheckoutPage() {
   const items = checkoutState.items?.length ? checkoutState.items : DEFAULT_CHECKOUT_ITEMS;
   const derivedTotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
   const total = Number.isFinite(checkoutState.total) ? checkoutState.total : derivedTotal;
-  const shippingFee = total >= 5000000 ? 0 : 30000;
+
+  const [deliveryType, setDeliveryType] = useState("ship");
+  const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successData, setSuccessData] = useState(null);
+  const [apiError, setApiError] = useState("");
 
   const [customer, setCustomer] = useState({
     fullName: currentUser?.fullName || "",
@@ -39,69 +50,122 @@ export default function CheckoutPage() {
     address: "",
     note: "",
   });
-  const [paymentMethod, setPaymentMethod] = useState("cod");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
 
+  const shippingFee = deliveryType === "ship" ? (total >= 5000000 ? 0 : 30000) : 0;
   const grandTotal = useMemo(() => total + shippingFee, [total, shippingFee]);
 
-  const updateField = (key, value) => {
+  const updateField = (key, value) =>
     setCustomer((prev) => ({ ...prev, [key]: value }));
-  };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    setApiError("");
 
     if (!customer.fullName.trim() || !customer.phone.trim() || !customer.address.trim()) {
       window.alert("Vui lòng nhập đầy đủ họ tên, số điện thoại và địa chỉ nhận hàng.");
       return;
     }
 
+    // Guard: phải đăng nhập
+    if (!currentUser) {
+      navigate("/login", { state: { from: "/checkout" } });
+      return;
+    }
+
+    const payload = {
+      totalAmount: grandTotal,
+      deliveryType,                         // "ship" | "store" → backend dùng để set trackingStatus
+      buyerName: customer.fullName,
+      buyerPhone: customer.phone,
+      address: customer.address,
+      latitude: checkoutState.latitude ?? null,
+      longitude: checkoutState.longitude ?? null,
+      items: items.map((item) => ({
+        productId: item.id,                 // integer productId khớp với backend
+        quantity: item.qty,
+        priceAtPurchase: item.price,
+      })),
+    };
+
     setIsSubmitting(true);
-    window.setTimeout(() => {
+    try {
+      const data = await createOrder(payload); // axiosClient tự gắn JWT
+      setSuccessData(data);
+    } catch (err) {
+      setApiError(err.message || "Đặt hàng thất bại, vui lòng thử lại.");
+    } finally {
       setIsSubmitting(false);
-      setIsSuccess(true);
-    }, 1000);
+    }
   };
 
-  if (isSuccess) {
+  /* ── Success screen ── */
+  if (successData) {
     return (
       <div className="checkout-page checkout-success-page">
         <div className="checkout-success-card">
           <div className="checkout-success-icon">✓</div>
-          <h1>Thanh toán thành công</h1>
-          <p>
-            Đơn hàng mock đã được ghi nhận. Nhân viên sẽ gọi xác nhận với bạn trong 5-10 phút.
-          </p>
+          <h1>Đặt hàng thành công!</h1>
+          <p>Nhân viên sẽ liên hệ xác nhận với bạn trong 5–10 phút.</p>
           <div className="checkout-success-meta">
-            <span>Tổng thanh toán: {fmt(grandTotal)}</span>
-            <span>Phương thức: {PAYMENT_METHODS.find((m) => m.id === paymentMethod)?.label}</span>
+            <span>Mã đơn hàng: #{successData.orderId}</span>
+            <span>Tổng thanh toán: {fmt(successData.totalAmount)}</span>
+            <span>Trạng thái: {successData.status}</span>
+            <span>
+              Phương thức: {PAYMENT_METHODS.find((m) => m.id === paymentMethod)?.label}
+            </span>
           </div>
           <div className="checkout-success-actions">
-            <button type="button" onClick={() => navigate("/")}>Về trang chủ</button>
-            <button type="button" className="outline" onClick={() => navigate("/cart")}>Mua tiếp</button>
+            <button type="button" onClick={() => navigate("/")}>
+              Về trang chủ
+            </button>
+            <button
+              type="button"
+              className="outline"
+              onClick={() => navigate("/orders/my-history")}
+            >
+              Xem đơn hàng
+            </button>
           </div>
         </div>
       </div>
     );
   }
 
+  /* ── Main checkout ── */
   return (
     <div className="checkout-page">
       <div className="checkout-topbar">
-        <button type="button" onClick={() => navigate("/cart")}>← Quay lại giỏ hàng</button>
-        <span>Checkout mock</span>
+        <button type="button" onClick={() => navigate("/cart")}>
+          ← Quay lại giỏ hàng
+        </button>
+        <span>Thanh toán</span>
       </div>
 
       <div className="checkout-layout">
         <form className="checkout-form-card" onSubmit={handleSubmit}>
           <h1>Thông tin giao hàng</h1>
 
+          {/* Delivery type */}
+          <div className="checkout-payment-methods">
+            <h2>Hình thức nhận hàng</h2>
+            {DELIVERY_TYPES.map((dt) => (
+              <label key={dt.id} className="checkout-radio-row">
+                <input
+                  type="radio"
+                  name="deliveryType"
+                  checked={deliveryType === dt.id}
+                  onChange={() => setDeliveryType(dt.id)}
+                />
+                <span>{dt.label}</span>
+              </label>
+            ))}
+          </div>
+
           <label>
             Họ và tên
             <input
               value={customer.fullName}
-              onChange={(event) => updateField("fullName", event.target.value)}
+              onChange={(e) => updateField("fullName", e.target.value)}
               placeholder="Nhập họ và tên"
             />
           </label>
@@ -110,17 +174,21 @@ export default function CheckoutPage() {
             Số điện thoại
             <input
               value={customer.phone}
-              onChange={(event) => updateField("phone", event.target.value)}
+              onChange={(e) => updateField("phone", e.target.value)}
               placeholder="Nhập số điện thoại"
             />
           </label>
 
           <label>
-            Địa chỉ nhận hàng
+            {deliveryType === "ship" ? "Địa chỉ nhận hàng" : "Chi nhánh / Địa chỉ nhận"}
             <input
               value={customer.address}
-              onChange={(event) => updateField("address", event.target.value)}
-              placeholder="Số nhà, đường, quận/huyện, tỉnh/thành"
+              onChange={(e) => updateField("address", e.target.value)}
+              placeholder={
+                deliveryType === "ship"
+                  ? "Số nhà, đường, quận/huyện, tỉnh/thành"
+                  : "Chọn chi nhánh gần nhất"
+              }
             />
           </label>
 
@@ -128,32 +196,36 @@ export default function CheckoutPage() {
             Ghi chú (tùy chọn)
             <textarea
               value={customer.note}
-              onChange={(event) => updateField("note", event.target.value)}
+              onChange={(e) => updateField("note", e.target.value)}
               placeholder="Ví dụ: giao giờ hành chính"
               rows={3}
             />
           </label>
 
+          {/* Payment method */}
           <div className="checkout-payment-methods">
             <h2>Phương thức thanh toán</h2>
-            {PAYMENT_METHODS.map((method) => (
-              <label key={method.id} className="checkout-radio-row">
+            {PAYMENT_METHODS.map((m) => (
+              <label key={m.id} className="checkout-radio-row">
                 <input
                   type="radio"
                   name="paymentMethod"
-                  checked={paymentMethod === method.id}
-                  onChange={() => setPaymentMethod(method.id)}
+                  checked={paymentMethod === m.id}
+                  onChange={() => setPaymentMethod(m.id)}
                 />
-                <span>{method.label}</span>
+                <span>{m.label}</span>
               </label>
             ))}
           </div>
 
+          {apiError && <div className="checkout-error-banner">{apiError}</div>}
+
           <button type="submit" className="checkout-submit-btn" disabled={isSubmitting}>
-            {isSubmitting ? "Đang xử lý thanh toán..." : "Xác nhận đặt hàng"}
+            {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt hàng"}
           </button>
         </form>
 
+        {/* Order summary */}
         <aside className="checkout-summary-card">
           <h2>Đơn hàng của bạn</h2>
 
@@ -176,14 +248,18 @@ export default function CheckoutPage() {
           </div>
           <div className="checkout-row">
             <span>Phí vận chuyển</span>
-            <span>{shippingFee === 0 ? "Miễn phí" : fmt(shippingFee)}</span>
+            <span>
+              {deliveryType === "store"
+                ? "Không áp dụng"
+                : shippingFee === 0
+                ? "Miễn phí"
+                : fmt(shippingFee)}
+            </span>
           </div>
           <div className="checkout-row total">
             <span>Tổng thanh toán</span>
             <strong>{fmt(grandTotal)}</strong>
           </div>
-
-          <p className="checkout-note">Trang thanh toán này sử dụng dữ liệu giả lập để demo luồng đặt hàng.</p>
         </aside>
       </div>
     </div>
