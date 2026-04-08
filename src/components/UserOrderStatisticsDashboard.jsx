@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { userOrderStatisticsApi } from '../services/userOrderStatisticsApi';
+import React from 'react';
 import {
   PieChart,
   Pie,
@@ -12,36 +11,18 @@ import {
 // Bảng màu trạng thái: Chờ xử lý (Vàng), Đã xác nhận (Xanh lơ), Đang giao (Xanh dương), Thành công (Xanh lá), Đã hủy (Đỏ), v.v.
 const COLORS = ['#f1c40f', '#00bcd4', '#3498db', '#2ecc71', '#e74c3c', '#9b59b6'];
 
-const UserOrderStatisticsDashboard = ({ userId = 1 }) => { // Mặc định userId = 1 để test nếu chưa có đăng nhập thực tế
-    const [statistics, setStatistics] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        fetchStatistics();
-    }, [userId]);
-
-    const fetchStatistics = async () => {
-        try {
-            setLoading(true);
-            const data = await userOrderStatisticsApi.getMyOrderStatistics(userId);
-            setStatistics(data);
-            setError(null);
-        } catch (err) {
-            setError('Không thể tải dữ liệu Thống kê Đơn hàng. Vui lòng thử lại sau.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
+const UserOrderStatisticsDashboard = ({ statistics, loading }) => {
+    
     // Hàm format tiền tệ VNĐ
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     };
 
-    if (loading) return <div style={styles.loading}>Đang tải dữ liệu...</div>;
-    if (error) return <div style={styles.error}>{error}</div>;
+    if (loading) return <div style={styles.loading}>Đang tải dữ liệu Thống kê...</div>;
     if (!statistics) return null;
+
+    const safeTotalSpent = statistics.totalSpent || 0;
+    const safeTotalOrders = statistics.totalOrders || 0;
 
     return (
         <div style={styles.container}>
@@ -51,14 +32,14 @@ const UserOrderStatisticsDashboard = ({ userId = 1 }) => { // Mặc định user
                 <div style={{...styles.card, borderLeft: '5px solid #3498db'}}>
                     <h3 style={styles.cardTitle}>Tổng số Đơn hàng</h3>
                     <p style={styles.cardNumber} className="total-orders-count">
-                        {statistics.totalOrders}
+                        {safeTotalOrders}
                     </p>
                 </div>
                 
                 <div style={{...styles.card, borderLeft: '5px solid #2ecc71'}}>
                     <h3 style={styles.cardTitle}>Tổng tiền Chi tiêu</h3>
                     <p style={{...styles.cardNumber, color: '#27ae60'}} className="total-spent-amount">
-                        {formatCurrency(statistics.totalSpent)}
+                        {formatCurrency(safeTotalSpent)}
                     </p>
                 </div>
             </div>
