@@ -146,6 +146,8 @@ export default function RegisterPage() {
       navigate('/verify-email', {
         state: {
           email: registerResult?.email || form.email.trim(),
+          startCooldown: true,
+          otpSentAtMs: Date.now(),
         },
       });
     } catch (error) {

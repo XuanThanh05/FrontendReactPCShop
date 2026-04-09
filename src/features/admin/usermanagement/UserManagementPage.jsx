@@ -6,6 +6,7 @@ import {
   updateAdminUserStatusApi,
 } from "../../../services/adminUserService";
 import { useAuth } from "../../auth/useAuth";
+import { Toast, useToast } from "./Toast";
 import "./UserManagementPage.css";
 
 function formatDate(dateString) {
@@ -22,6 +23,7 @@ function formatDate(dateString) {
 
 export default function UserManagementPage() {
   const { currentUser } = useAuth();
+  const { toasts, showToast, removeToast } = useToast();
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -105,8 +107,11 @@ export default function UserManagementPage() {
       setErrorMessage("");
       await deleteAdminUserApi(user.id);
       setUsers((prev) => prev.filter((item) => item.id !== user.id));
+      showToast(`Tài khoản ${user.username} đã được xóa thành công.`, "success");
     } catch (error) {
-      setErrorMessage(error?.message || "Xóa tài khoản thất bại.");
+      const errorMsg = error?.message || "Xóa tài khoản thất bại.";
+      setErrorMessage(errorMsg);
+      showToast(errorMsg, "error");
     } finally {
       setDeletingUserId(null);
     }
@@ -136,12 +141,16 @@ export default function UserManagementPage() {
         if (item.id !== user.id) return item;
         return { ...item, isActive: nextEnabled };
       }));
+      const actionText = nextEnabled ? "mở khóa" : "khóa";
+      showToast(`Tài khoản ${user.username} đã được ${actionText} thành công.`, "success");
     } catch (error) {
-      setErrorMessage(error?.message || "Cập nhật trạng thái thất bại.");
+      const errorMsg = error?.message || "Cập nhật trạng thái thất bại.";
+      setErrorMessage(errorMsg);
+      showToast(errorMsg, "error");
     } finally {
       setUpdatingStatusUserId(null);
     }
-  };
+  };;
 
   const closeConfirmDialog = () => {
     setConfirmDialog({ open: false, mode: null, user: null, nextEnabled: null });
@@ -177,6 +186,18 @@ export default function UserManagementPage() {
 
   return (
     <div className="user-admin-page">
+      <div className="toast-container">
+        {toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            autoClose={toast.autoClose}
+            onClose={() => removeToast(toast.id)}
+          />
+        ))}
+      </div>
+
       {confirmDialog.open ? (
         <div className="confirm-modal-overlay" role="dialog" aria-modal="true" onClick={closeConfirmDialog}>
           <div className="confirm-modal" onClick={(event) => event.stopPropagation()}>
@@ -243,6 +264,7 @@ export default function UserManagementPage() {
                 <th>Email</th>
                 <th>Vai trò</th>
                 <th>Trạng thái</th>
+                <th>Xác thực Email</th>
                 <th>Ngày tạo</th>
                 <th>Hành động</th>
               </tr>
@@ -250,7 +272,7 @@ export default function UserManagementPage() {
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={8}>Đang tải dữ liệu...</td>
+                  <td colSpan={9}>Đang tải dữ liệu...</td>
                 </tr>
               ) : null}
               {filteredUsers.map((user) => {
@@ -275,6 +297,11 @@ export default function UserManagementPage() {
                     <td>
                       <span className={`status-badge ${user.isActive ? "active" : "blocked"}`}>
                         {user.isActive ? "Hoạt động" : "Đã khóa"}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`verify-badge ${user.emailVerified ? "verified" : "unverified"}`}>
+                        {user.emailVerified ? "✓ Đã xác minh" : "✗ Chưa xác minh"}
                       </span>
                     </td>
                     <td>{formatDate(user.createdAt)}</td>

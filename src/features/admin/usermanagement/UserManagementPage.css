@@ -220,6 +220,25 @@
   color: #be123c;
 }
 
+.verify-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.verify-badge.verified {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.verify-badge.unverified {
+  background: #fef3c7;
+  color: #b45309;
+}
+
 .user-actions {
   display: flex;
   gap: 8px;
@@ -290,4 +309,19 @@
   .user-filters {
     grid-template-columns: 1fr;
   }
+}
+
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1500;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast-container .toast {
+  pointer-events: auto;
 }

@@ -36,6 +36,7 @@ function toUserRow(apiUser) {
     email: apiUser?.email || "",
     role: role.includes("ADMIN") ? "admin" : "customer",
     isActive: Boolean(apiUser?.enabled),
+    emailVerified: Boolean(apiUser?.emailVerified),
     createdAt: apiUser?.createdAt || new Date().toISOString(),
     customerId: apiUser?.customerId || null,
   };

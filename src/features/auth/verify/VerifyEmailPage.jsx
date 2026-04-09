@@ -5,38 +5,111 @@ import './VerifyEmailPage.css';
 import { resendEmailOtpApi, verifyEmailOtpApi } from '../../../services/authService';
 
 const RESEND_COOLDOWN_SECONDS = 60;
+const VERIFY_EMAIL_STORAGE_KEY = 'pcshop_verify_email';
+
+function normalizeEmailForKey(rawEmail) {
+  return String(rawEmail || '').trim().toLowerCase();
+}
+
+function getResendStorageKey(email) {
+  return `pcshop_otp_resend_available_at_${normalizeEmailForKey(email)}`;
+}
 
 export default function VerifyEmailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const otpInputRefs = useRef([]);
+  const hasInitializedFirstOtpCooldown = useRef(false);
 
-  const [email, setEmail] = useState(location?.state?.email || '');
+  const [email, setEmail] = useState(() => {
+    const fromState = String(location?.state?.email || '').trim();
+    if (fromState) return fromState;
+    return String(window.localStorage.getItem(VERIFY_EMAIL_STORAGE_KEY) || '').trim();
+  });
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
-  const [cooldown, setCooldown] = useState(0);
+  const [resendAvailableAtMs, setResendAvailableAtMs] = useState(0);
+  const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now());
 
   useEffect(() => {
-    if (location?.state?.email && !email) {
-      setEmail(location.state.email);
+    const stateEmail = String(location?.state?.email || '').trim();
+    if (stateEmail && stateEmail !== email) {
+      setEmail(stateEmail);
     }
   }, [location?.state?.email, email]);
+
+  useEffect(() => {
+    const trimmedEmail = String(email || '').trim();
+    if (trimmedEmail) {
+      window.localStorage.setItem(VERIFY_EMAIL_STORAGE_KEY, trimmedEmail);
+      return;
+    }
+    window.localStorage.removeItem(VERIFY_EMAIL_STORAGE_KEY);
+  }, [email]);
 
   useEffect(() => {
     otpInputRefs.current[0]?.focus();
   }, []);
 
   useEffect(() => {
-    if (cooldown <= 0) return undefined;
+    if (resendAvailableAtMs <= Date.now()) return undefined;
+
     const timer = window.setInterval(() => {
-      setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+      setCurrentTimeMs(Date.now());
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, [cooldown]);
+  }, [resendAvailableAtMs]);
+
+  useEffect(() => {
+    const normalizedEmail = normalizeEmailForKey(email);
+    if (!normalizedEmail) {
+      setResendAvailableAtMs(0);
+      return;
+    }
+
+    const storageKey = getResendStorageKey(normalizedEmail);
+    const rawStoredTime = window.localStorage.getItem(storageKey);
+    const storedTimeMs = Number(rawStoredTime);
+
+    if (Number.isFinite(storedTimeMs) && storedTimeMs > Date.now()) {
+      setResendAvailableAtMs(storedTimeMs);
+    } else {
+      setResendAvailableAtMs(0);
+      if (rawStoredTime) {
+        window.localStorage.removeItem(storageKey);
+      }
+    }
+  }, [email]);
+
+  useEffect(() => {
+    if (hasInitializedFirstOtpCooldown.current) return;
+
+    const shouldStartFromFirstSend = Boolean(location?.state?.startCooldown);
+    const normalizedEmail = normalizeEmailForKey(email);
+    if (!shouldStartFromFirstSend || !normalizedEmail) return;
+
+    const stateSentAtMs = Number(location?.state?.otpSentAtMs);
+    const sentAtMs = Number.isFinite(stateSentAtMs) ? stateSentAtMs : Date.now();
+    const targetMs = sentAtMs + (RESEND_COOLDOWN_SECONDS * 1000);
+
+    setResendAvailableAtMs((prev) => {
+      const next = Math.max(prev, targetMs);
+      window.localStorage.setItem(getResendStorageKey(normalizedEmail), String(next));
+      return next;
+    });
+
+    hasInitializedFirstOtpCooldown.current = true;
+  }, [location?.state?.otpSentAtMs, location?.state?.startCooldown, email]);
+
+  const cooldown = useMemo(() => {
+    const remainingMs = resendAvailableAtMs - currentTimeMs;
+    if (remainingMs <= 0) return 0;
+    return Math.ceil(remainingMs / 1000);
+  }, [resendAvailableAtMs, currentTimeMs]);
 
   const canResend = useMemo(() => cooldown <= 0 && !isResending, [cooldown, isResending]);
   const otpValue = otpDigits.join('');
@@ -95,6 +168,13 @@ export default function VerifyEmailPage() {
       setIsSubmitting(true);
       const response = await verifyEmailOtpApi({ email, otp: otpValue });
       setSuccessMessage(response?.message || 'Xác minh email thành công.');
+
+      const normalizedEmail = normalizeEmailForKey(email);
+      window.localStorage.removeItem(VERIFY_EMAIL_STORAGE_KEY);
+      if (normalizedEmail) {
+        window.localStorage.removeItem(getResendStorageKey(normalizedEmail));
+      }
+
       window.setTimeout(() => {
         navigate('/login', { replace: true });
       }, 1200);
@@ -106,6 +186,8 @@ export default function VerifyEmailPage() {
   };
 
   const handleResend = async () => {
+    if (!canResend) return;
+
     setErrorMessage('');
     setSuccessMessage('');
 
@@ -118,7 +200,18 @@ export default function VerifyEmailPage() {
       setIsResending(true);
       const response = await resendEmailOtpApi({ email });
       setSuccessMessage(response?.message || 'Đã gửi lại OTP.');
-      setCooldown(RESEND_COOLDOWN_SECONDS);
+
+      const normalizedEmail = normalizeEmailForKey(email);
+      const nextResendAvailableAtMs = Date.now() + (RESEND_COOLDOWN_SECONDS * 1000);
+      setResendAvailableAtMs(nextResendAvailableAtMs);
+      setCurrentTimeMs(Date.now());
+
+      if (normalizedEmail) {
+        window.localStorage.setItem(
+          getResendStorageKey(normalizedEmail),
+          String(nextResendAvailableAtMs)
+        );
+      }
     } catch (error) {
       setErrorMessage(error?.message || 'Không thể gửi lại OTP.');
     } finally {
