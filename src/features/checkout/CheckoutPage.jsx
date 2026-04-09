@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
 import { createOrder } from "../../services/orderService";
+import cartService from "../../services/cartService";
 import "./CheckoutPage.css";
 
 const DEFAULT_CHECKOUT_ITEMS = [
@@ -55,12 +56,22 @@ export default function CheckoutPage() {
 
   const updateField = (key, value) => setCustomer((prev) => ({ ...prev, [key]: value }));
 
+  const updatePhone = (value) => {
+    const digitsOnly = value.replace(/\D/g, "").slice(0, 10);
+    updateField("phone", digitsOnly);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setApiError("");
 
     if (!customer.fullName.trim() || !customer.phone.trim() || !customer.address.trim()) {
       window.alert("Vui lòng nhập đầy đủ họ tên, số điện thoại và địa chỉ nhận hàng.");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(customer.phone)) {
+      window.alert("Số điện thoại phải gồm đúng 10 chữ số và chỉ chứa số.");
       return;
     }
 
@@ -88,6 +99,16 @@ export default function CheckoutPage() {
     try {
       const data = await createOrder(payload);
       setSuccessData(data);
+      const cartItemIds = items
+        .filter((item) => item.cartItemId != null)
+        .map((item) => item.cartItemId);
+      if (cartItemIds.length > 0) {
+        try {
+          await Promise.all(cartItemIds.map((id) => cartService.removeCartItem(id)));
+        } catch (removeErr) {
+          console.error("Không xóa được sản phẩm trong giỏ sau khi đặt hàng:", removeErr);
+        }
+      }
     } catch (err) {
       setApiError(err.message || "Đặt hàng thất bại, vui lòng thử lại.");
     } finally {
@@ -171,8 +192,12 @@ export default function CheckoutPage() {
           <label>
             Số điện thoại
             <input
+              type="tel"
+              inputMode="numeric"
+              pattern="\d{10}"
+              maxLength={10}
               value={customer.phone}
-              onChange={(e) => updateField("phone", e.target.value)}
+              onChange={(e) => updatePhone(e.target.value)}
               placeholder="Nhập số điện thoại"
             />
           </label>

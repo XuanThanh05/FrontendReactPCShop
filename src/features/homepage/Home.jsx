@@ -112,10 +112,29 @@ export default function Home() {
                   </Link>
                 ))}
               </div>
-              <div className="pagination" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '20px' }}>
-                <button onClick={() => fetchProducts(currentPage - 1)} disabled={currentPage === 0}>Trước</button>
-                <span>Trang {currentPage + 1} / {totalPages}</span>
-                <button onClick={() => fetchProducts(currentPage + 1)} disabled={currentPage >= totalPages - 1}>Sau</button>
+              <div className="pagination-controls" aria-label="Điều hướng trang sản phẩm">
+                <button
+                  type="button"
+                  className="pagination-button"
+                  onClick={() => fetchProducts(currentPage - 1)}
+                  disabled={currentPage === 0}
+                >
+                  ‹ Trước
+                </button>
+                <div className="pagination-summary">
+                  <span className="pagination-label">Trang</span>
+                  <strong>{currentPage + 1}</strong>
+                  <span className="pagination-divider">/</span>
+                  <span>{totalPages || 1}</span>
+                </div>
+                <button
+                  type="button"
+                  className="pagination-button"
+                  onClick={() => fetchProducts(currentPage + 1)}
+                  disabled={currentPage >= totalPages - 1}
+                >
+                  Sau ›
+                </button>
               </div>
             </section>
           </main>
